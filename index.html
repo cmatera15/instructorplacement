@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor Placement Tool – Rize Education</title>
+<style>
+  :root {
+    --bg:#f5f5f5;--surface:#fff;--border:#e0e0e0;
+    --primary:#1a56db;--primary-light:#ebf0ff;
+    --text:#1a1a1a;--muted:#6b7280;
+    --green:#059669;--green-light:#d1fae5;
+    --amber:#d97706;--amber-light:#fef3c7;
+    --red:#dc2626;--red-light:#fee2e2;
+    --purple:#7c3aed;--purple-light:#ede9fe;
+    --radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+  #topbar{background:#111827;color:#fff;padding:0 20px;display:flex;align-items:center;gap:20px;height:52px;position:sticky;top:0;z-index:100;overflow-x:auto}
+  #topbar h1{font-size:14px;font-weight:600;white-space:nowrap}
+  .rize{color:#60a5fa}
+  nav{display:flex;gap:2px;margin-left:16px}
+  nav button{background:none;border:none;color:#9ca3af;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+  nav button:hover{color:#fff;background:#1f2937}
+  nav button.active{color:#fff;background:#1a56db}
+  .spacer{flex:1;min-width:12px}
+  .topbar-actions{display:flex;gap:6px}
+  #app{display:flex;height:calc(100vh - 52px)}
+  #sidebar{width:240px;min-width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+  #main{flex:1;overflow-y:auto;padding:16px 20px}
+  .sidebar-section{padding:10px 14px 8px;border-bottom:1px solid var(--border)}
+  .sidebar-section h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:7px}
+  .search-row{padding:10px 14px;border-bottom:1px solid var(--border)}
+  .search-wrap{position:relative}
+  .search-wrap input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:#f9fafb}
+  .search-wrap input:focus{outline:none;border-color:var(--primary);background:#fff}
+  .search-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+  .btn{padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;color:var(--text);white-space:nowrap}
+  .btn:hover{background:#f3f4f6}
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn-primary:hover{background:#1648c0}
+  .btn-sm{padding:4px 9px;font-size:11px}
+  .btn-dark{background:#374151;color:#fff;border-color:#374151}
+  .btn-dark:hover{background:#1f2937}
+  select.fs{padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--surface);cursor:pointer;width:100%}
+  .stats-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .stat-card{background:var(--surface);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow);flex:1;min-width:100px}
+  .stat-card .val{font-size:22px;font-weight:700;color:var(--primary)}
+  .stat-card .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+  .program-block{margin-bottom:24px}
+  .program-title{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+  .program-title .tog{color:var(--muted);font-size:11px}
+  .tbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+  .tbadge-Pathways{background:#dbeafe;color:#1e40af}
+  .tbadge-Pillars{background:#d1fae5;color:#065f46}
+  .tbadge-MBA{background:#ede9fe;color:#5b21b6}
+  .tbadge-Other{background:#f3f4f6;color:#374151}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  thead{background:#f9fafb}
+  th{padding:9px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none}
+  th:hover{background:#f3f4f6}
+  td{padding:9px 10px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:nth-child(even) td{background:#f8faff}
+  tr:hover td{background:#eef3ff}
+  tr.xrow td{background:#f0f4fb}
+  .pbadge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;font-size:10px;font-weight:800;background:#fce7f3;color:#9d174d;flex-shrink:0;margin-left:3px;vertical-align:middle;border:1px solid #f9a8d4}
+  .ppbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:800;flex-shrink:0;margin-right:2px;vertical-align:middle}
+  .ppbadge-1{background:#fbbf24;color:#78350f}
+  .ppbadge-2{background:#d1d5db;color:#374151}
+  .ppbadge-3{background:#fed7aa;color:#92400e}
+  .ppbadge-n{background:#f3f4f6;color:#9ca3af}
+  .reco-block{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .reco-hdr{padding:10px 14px;background:#f9fafb;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .reco-hdr .rc{font-weight:700;font-size:13px}
+  .reco-hdr .ri{font-size:11px;color:var(--muted)}
+  .reco-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #f3f4f6}
+  .reco-row:last-child{border-bottom:none}
+  .reco-rank{font-size:11px;font-weight:700;color:var(--muted);width:18px;flex-shrink:0}
+  .reco-name{flex:1;font-size:13px;font-weight:500}
+  .reco-meta{font-size:11px;color:var(--muted)}
+  .sh{color:var(--green)}.sm{color:var(--amber)}.sl{color:var(--red)}.sn{color:var(--muted);font-size:12px;font-style:italic}
+  .sbadge{display:inline-flex;align-items:center;justify-content:center;width:40px;height:32px;border-radius:16px;font-weight:800;font-size:11px;flex-shrink:0}
+  .sbadge-s4{background:#4ade80;color:#14532d}
+  .sbadge-s3{background:#86efac;color:#166534}
+  .sbadge-s2{background:#d9f99d;color:#3f6212}
+  .sbadge-s1{background:#fef9c3;color:#854d0e}
+  .sbadge-none{background:#f3f4f6;color:var(--muted)}
+  .sbadge-returning{background:#bfdbfe;color:#1e40af}
+  .stbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+  .stbadge-Vetted{background:var(--green-light);color:var(--green)}
+  .stbadge-Placed{background:var(--primary-light);color:var(--primary)}
+  .stbadge-Archived{background:#f3f4f6;color:var(--muted)}
+  .stbadge-Hired{background:var(--purple-light);color:var(--purple)}
+  .stbadge-Returning{background:#dbeafe;color:#1e40af}
+  .stbadge-Other{background:#f3f4f6;color:var(--muted)}
+  .cpill{display:inline-block;background:#f3f4f6;border-radius:4px;padding:1px 5px;font-size:10px;margin:1px;color:#374151}
+  .cpill-placed{background:var(--primary-light);color:var(--primary);font-weight:700}
+  .cpill-hl{background:#fef3c7;color:#92400e;font-weight:700}
+  .detail-panel{padding:16px 18px 16px;display:grid;grid-template-columns:1.1fr 0.7fr 1.2fr;gap:36px;border-top:2px solid var(--primary)}
+  .detail-lower{padding:14px 18px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:36px;border-top:1px solid var(--border)}
+  .detail-placements{padding:14px 18px 14px;border-top:1px solid var(--border)}
+  .detail-courses{padding:14px 18px 12px;border-top:1px solid var(--border)}
+  .ds h4,.section-hdr{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#374151;margin-bottom:10px;font-weight:800;border-bottom:1px solid var(--border);padding-bottom:5px}
+  .df{margin-bottom:9px}
+  .dl{font-size:10px;color:var(--muted);margin-bottom:2px;font-weight:500}
+  .dv{font-size:12px;line-height:1.4}
+  .sbar{height:7px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:4px}
+  .sbar-f{height:100%;background:var(--primary);border-radius:4px}
+  .pform{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .pform select,.pform input[type=text]{padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:12px}
+  .pform select{min-width:200px}
+  .pform input[type=text]{flex:1;min-width:120px}
+  .pitem{display:flex;align-items:center;gap:6px;background:var(--primary-light);border-radius:6px;padding:4px 10px;margin:2px 0;font-size:12px}
+  .pitem .pc{font-weight:700;color:var(--primary)}
+  .pitem .pn{color:var(--muted);font-style:italic;margin-left:4px}
+  .pitem .rm{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;margin-left:auto;line-height:1}
+  .pitem .rm:hover{color:var(--red)}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border-radius:12px;padding:24px;max-width:560px;width:90%;max-height:85vh;overflow-y:auto}
+  .modal h2{font-size:16px;margin-bottom:12px}
+  .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+  .uzone{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;background:#fafafa;cursor:pointer;transition:all .2s}
+  .uzone:hover,.uzone.dov{border-color:var(--primary);background:var(--primary-light)}
+  .cmrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .cmrow label{width:160px;font-size:12px;font-weight:500;flex-shrink:0}
+  .cmrow select{flex:1;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:12px}
+  .slog{font-size:11px;color:var(--muted)}
+  .slog span{color:var(--text);font-weight:500}
+  .cside-wrap{display:flex;gap:0;height:calc(100vh - 88px)}
+  .cpanel{width:260px;min-width:260px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;margin-right:16px}
+  .clist{overflow-y:auto;flex:1}
+  .citem{padding:7px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background .1s}
+  .citem:hover{background:#f9fafb}
+  .citem.active{background:var(--primary-light);border-left:3px solid var(--primary)}
+  .citem .cc{font-size:10px;color:var(--muted)}
+  .citem .cn{font-size:12px;font-weight:500}
+  .citem .cnt{font-size:10px;color:var(--primary);font-weight:600}
+  .pghdr{padding:6px 14px 3px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:#f9fafb;position:sticky;top:0;z-index:1}
+  .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+  .empty .icon{font-size:36px;margin-bottom:10px}
+  .hidden{display:none!important}
+  hr{border:none;border-top:1px solid var(--border);margin:10px 0}
+  .rn{font-size:11px;color:var(--muted);font-weight:700;width:20px;display:inline-block}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <h1 style="display:flex;align-items:center;gap:10px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1178.3 290.4" style="height:26px;display:block"><defs><style>.rr1{fill:#fff}.rr2{fill:#0195ff}.rr3{fill:#0159cb}</style></defs><path class="rr3" d="M58.7,0L0,58.7h231.7v231.7l58.7-58.7V0H58.7Z"/><path class="rr2" d="M58.7,117.3L0,176h114.4v114.4l58.7-58.7v-114.4H58.7Z"/><path class="rr1" d="M549.2,22.1c-37.6,0-72.1,14.6-97.8,38.3l-3.8-37.2h-41.9v244.3h46.8v-93.9c0-58.6,39.3-106,101.2-106h14.6V22.2h-19.1v-.1Z"/><path class="rr1" d="M844.3,66h-136.9V23.6h201.3v34.5l-136.5,167.5h136.5v42.3h-201.3v-34l136.9-168Z"/><path class="rr1" d="M1103.3,220.6c-10.1,7.6-24.3,11.4-42.2,11.4s-20.3-1.9-29.6-5.6-17.6-8.9-24.7-15.4-13.1-14.3-17.6-23.3c-4.5-8.8-7.1-18.5-7.8-28.8h196.8v-2.1s.1-6.5.1-13.6c0-17.6-3-34.3-8.9-49.8-5.9-15.4-14.4-29.1-25-40.6-10.7-11.5-23.6-20.8-38.4-27.4s-31-10-48.3-10-34.2,3.4-49.1,10-28.1,15.8-39.1,27.4c-11,11.5-19.8,25.4-26.1,41.1-6.3,15.7-9.4,33-9.4,51.3s0,2.1,0,3.1c.3,17.8,3.5,34.3,9.4,49.2,6.3,15.8,15.1,29.5,26.3,40.9,11.2,11.4,24.7,20.4,40.1,26.8,15.4,6.4,32.5,9.7,50.8,9.7s47.1-5.9,65.5-17.7c15-9.6,27.5-21.7,37.1-36.1l-34.7-27.3c-7.2,10.6-15.6,19.6-25.1,26.7ZM990.1,99.5c4.2-7.8,9.7-14.9,16.4-21.1,6.7-6.2,14.3-11.3,22.8-15.2,8.4-3.9,17.6-5.8,27.2-5.8s18.9,1.7,27.3,5.1,16,8.1,22.5,13.9,11.9,12.8,16.1,20.8c3.3,6.2,5.6,13,6.9,20.2h-146.1c1.3-6.1,3.6-12.1,6.8-17.9Z"/><path class="rr1" d="M615,267.4V23.1h46.8v244.3h-46.8Z"/></svg><span style="font-size:15px;font-weight:600;color:#fff;border-left:1px solid rgba(255,255,255,.2);padding-left:10px">Instructor Placement</span></h1>
+  <nav>
+    <button class="active" onclick="switchView('program')">By Program</button>
+    <button onclick="switchView('instructor')">By Instructor</button>
+    <button onclick="switchView('course')">By Course</button>
+    <button onclick="switchView('reco')">✨ Recommend</button>
+  </nav>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="search-row">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="gs" placeholder="Search names, courses…" oninput="onSearch()">
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <h3>Quick Stats</h3>
+      <div class="slog" id="qs">—</div>
+    </div>
+    <div class="sidebar-section" style="flex-shrink:0">
+      <h3>Filters</h3>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <select id="fst" class="fs" onchange="applyF()">
+          <option value="">All Statuses</option>
+          <option value="Returning">Returning</option>
+          <option value="Vetted">Vetted</option>
+          <option value="Placed">Placed</option>
+          <option value="Hired">Hired</option>
+          <option value="Archived">Archived</option>
+        </select>
+        <select id="fplac" class="fs" onchange="applyF()">
+          <option value="">All Placements</option>
+          <option value="0">0 sections placed</option>
+          <option value="1">1 section placed</option>
+          <option value="2">2 sections placed</option>
+          <option value="3">3 sections placed</option>
+          <option value="4+">4+ sections placed</option>
+        </select>
+        <select id="fty" class="fs" onchange="applyF()">
+          <option value="">All Course Types</option>
+          <option value="Pathways">Pathways</option>
+          <option value="Pillars">Pillars</option>
+          <option value="MBA">MBA</option>        </select>
+        <select id="fprog" class="fs" onchange="applyF()">
+          <option value="">All Programs</option>
+        </select>
+        <select id="fpub" class="fs" onchange="applyF()">
+          <option value="">Published — Any</option>
+          <option value="yes">Published ✓</option>
+          <option value="no">Not Published</option>
+        </select>
+        <input type="number" id="fpuby" placeholder="Published since year (e.g. 2020)" min="2000" max="2026" style="padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:11px;width:100%;box-sizing:border-box" oninput="applyF()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
+          <div style="font-size:10px;color:var(--muted);font-weight:600">Courses</div>
+          <button id="cfMatchBtn" onclick="toggleCourseMatch()" style="font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--primary);background:var(--primary-light);color:var(--primary);cursor:pointer;font-weight:700">Match ALL</button>
+        </div>
+        <div id="cfTags" style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px"></div>
+        <div style="position:relative">
+          <input type="text" id="cfSearch" placeholder="Type to add a course…" autocomplete="off"
+            oninput="showCfDropdown()" onfocus="showCfDropdown()" onblur="setTimeout(hideCfDropdown,150)"
+            onkeydown="cfKeyNav(event)"
+            style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#f9fafb;box-sizing:border-box">
+          <div id="cfDrop" style="display:none;position:fixed;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);max-height:220px;overflow-y:auto;z-index:500;width:230px"></div>
+        </div>
+        <button class="btn btn-sm" onclick="clearF()" style="font-size:11px;margin-top:2px">Clear filters</button>
+      </div>
+    </div>
+    <div class="sidebar-section" style="flex-shrink:0">
+      <h3>Data</h3>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:10px;color:var(--muted);font-weight:600">Import</div>
+        <button id="syncSheetsBtn" class="btn btn-sm" onclick="syncFromSheets()" style="font-size:11px;text-align:left;background:#0f4c35;color:#6ee7b7;border-color:#0f4c35">☁ Sync from Sheets</button>
+
+        <button class="btn btn-sm" onclick="openModal('returning')" style="font-size:11px;text-align:left;background:#1e3a8a;color:#bfdbfe;border-color:#1e3a8a">↩ Returning</button>
+        <button class="btn btn-sm btn-dark" onclick="openModal('staffing')" style="font-size:11px;text-align:left">⬆ Staffing</button>
+        <button class="btn btn-sm" onclick="confirmReset()" style="font-size:11px;text-align:left;background:#7f1d1d;color:#fca5a5;border-color:#7f1d1d">↺ Reset All Data</button>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:4px">Export</div>
+        <button class="btn btn-sm btn-primary" onclick="exportCSV()" style="font-size:11px;text-align:left">⬇ Export CSV</button>
+        <div id="lastSyncTs" style="font-size:10px;color:var(--muted);margin-top:8px">Never synced</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="vP"></div>
+    <div id="vI" class="hidden"></div>
+    <div id="vC" class="hidden"></div>
+    <div id="vR" class="hidden"></div>
+  </div>
+</div>
+
+<div id="profileDrawer" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35)" onclick="closeProfileDrawer()">
+  <div id="profileDrawerInner" onclick="event.stopPropagation()" style="position:absolute;right:0;top:0;bottom:0;width:min(720px,95vw);background:var(--surface);box-shadow:-4px 0 24px rgba(0,0,0,.18);overflow-y:auto;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:2px solid var(--primary);background:var(--surface);position:sticky;top:0;z-index:1">
+      <div id="profileDrawerTitle" style="font-size:15px;font-weight:700"></div>
+      <button onclick="closeProfileDrawer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+    </div>
+    <div id="profileDrawerBody" style="flex:1"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="uModal">
+  <div class="modal">
+    <h2 id="uTitle">Upload CSV</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px" id="uDesc"></p>
+    <div class="uzone" id="uZone" onclick="document.getElementById('fi').click()"
+      ondragover="event.preventDefault();this.classList.add('dov')"
+      ondragleave="this.classList.remove('dov')"
+      ondrop="handleDrop(event)">
+      <div style="font-size:26px">📄</div>
+      <strong id="uLabel">Click to select CSV</strong>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px">or drag and drop here</p>
+    </div>
+    <input type="file" id="fi" accept=".csv" class="hidden" onchange="handleFile(event)">
+    <div id="cmSec" class="hidden" style="margin-top:14px">
+      <h3 style="font-size:13px;margin-bottom:10px">Map Columns</h3>
+      <div id="cmRows"></div>
+    </div>
+    <div id="pvSec" class="hidden" style="margin-top:10px">
+      <p id="pvText" style="font-size:12px;color:var(--muted)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="impBtn" onclick="doImport()" disabled>Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resetModal">
+  <div class="modal" style="max-width:420px">
+    <div style="font-size:28px;text-align:center;margin-bottom:10px">⚠️</div>
+    <h2 style="text-align:center">Reset all data?</h2>
+    <p style="font-size:13px;color:var(--muted);margin:12px 0;text-align:center">This will permanently erase all placements, status changes, and uploaded data, and restore the app to its original pre-loaded state.</p>
+    <p style="font-size:13px;font-weight:600;text-align:center;color:var(--red)">This cannot be undone.</p>
+    <p style="font-size:12px;color:var(--muted);margin-top:14px">Type <strong>RESET</strong> to confirm:</p>
+    <input type="text" id="resetConfirm" placeholder="Type RESET here…"
+      oninput="document.getElementById('doResetBtn').disabled=this.value!=='RESET'"
+      style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;margin-top:6px">
+    <div class="modal-footer">
+      <button class="btn" onclick="document.getElementById('resetModal').classList.remove('open');document.getElementById('resetConfirm').value='';document.getElementById('doResetBtn').disabled=true">Cancel</button>
+      <button class="btn" id="doResetBtn" disabled onclick="doReset()" style="background:#dc2626;color:#fff;border-color:#dc2626">Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COURSES = [{"name":"Introduction to Generative AI","program":"AAI","code":"AAI I","type":"Pathways","codeName":"AAI I: Introduction to Generative AI"},{"name":"Career Navigation and Exploration in Applied AI","program":"AAI","code":"AAI II","type":"Pathways","codeName":"AAI II: Career Navigation and Exploration in Applied AI"},{"name":"Predictive Modeling in AI","program":"AAI","code":"AAI III","type":"Pathways","codeName":"AAI III: Predictive Modeling in AI"},{"name":"Prescriptive AI","program":"AAI","code":"AAI IV","type":"Pathways","codeName":"AAI IV: Prescriptive AI"},{"name":"Financial Accounting","program":"ACCNT","code":"ACCNT I","type":"Pathways","codeName":"ACCNT I: Financial Accounting"},{"name":"Managerial Accounting","program":"ACCNT","code":"ACCNT II","type":"Pathways","codeName":"ACCNT II: Managerial Accounting"},{"name":"Intermediate Accounting I","program":"ACCNT","code":"ACCNT III","type":"Pathways","codeName":"ACCNT III: Intermediate Accounting I"},{"name":"Intermediate Accounting II","program":"ACCNT","code":"ACCNT IV","type":"Pathways","codeName":"ACCNT IV: Intermediate Accounting II"},{"name":"Auditing","program":"ACCNT","code":"ACCNT IX","type":"Pathways","codeName":"ACCNT IX: Auditing"},{"name":"Managerial Cost Accounting","program":"ACCNT","code":"ACCNT V","type":"Pathways","codeName":"ACCNT V: Managerial Cost Accounting"},{"name":"Accounting Information Systems and Controls","program":"ACCNT","code":"ACCNT VI","type":"Pathways","codeName":"ACCNT VI: Accounting Information Systems and Controls"},{"name":"Taxation I: Individual Income Tax","program":"ACCNT","code":"ACCNT VII","type":"Pathways","codeName":"ACCNT VII: Taxation I: Individual Income Tax"},{"name":"Taxation II: Corporate Income Tax","program":"ACCNT","code":"ACCNT VIII","type":"Pathways","codeName":"ACCNT VIII: Taxation II: Corporate Income Tax"},{"name":"Advanced Accounting","program":"ACCNT","code":"ACCNT X","type":"Pathways","codeName":"ACCNT X: Advanced Accounting"},{"name":"Career Navigation and Exploration in Accounting","program":"ACCNT","code":"ACCNT XI","type":"Pathways","codeName":"ACCNT XI: Career Navigation and Exploration in Accounting"},{"name":"AI for Everyone","program":"AIL","code":"AIL I","type":"Pathways","codeName":"AIL I: AI for Everyone"},{"name":"AI for Decision-Making","program":"AIL","code":"AIL II","type":"Pathways","codeName":"AIL II: AI for Decision-Making"},{"name":"AI for Creativity and Design","program":"AIL","code":"AIL III","type":"Pathways","codeName":"AIL III: AI for Creativity and Design"},{"name":"AI Ethics","program":"AIL","code":"AIL IV","type":"Pathways","codeName":"AIL IV: AI Ethics"},{"name":"Generative AI for Managers","program":"AIMBA","code":"AIMBA I","type":"MBA","codeName":"AIMBA I: Generative AI for Managers"},{"name":"Business Use Cases for AI","program":"AIMBA","code":"AIMBA II","type":"MBA","codeName":"AIMBA II: Business Use Cases for AI"},{"name":"AI Governance and Ethics","program":"AIMBA","code":"AIMBA III","type":"MBA","codeName":"AIMBA III: AI Governance and Ethics"},{"name":"Managing AI Projects","program":"AIMBA","code":"AIMBA IV","type":"MBA","codeName":"AIMBA IV: Managing AI Projects"},{"name":"Mathematical Theory of Interest","program":"ASM","code":"ASM I","type":"Pathways","codeName":"ASM I: Mathematical Theory of Interest"},{"name":"Probability for Actuaries","program":"ASM","code":"ASM II","type":"Pathways","codeName":"ASM II: Probability for Actuaries"},{"name":"Actuarial Science and Risk Management With R","program":"ASM","code":"ASM III","type":"Pathways","codeName":"ASM III: Actuarial Science and Risk Management With R"},{"name":"Business Analytics I","program":"BAM","code":"BAM I","type":"Pathways","codeName":"BAM I: Business Analytics I"},{"name":"Business Analytics II","program":"BAM","code":"BAM II","type":"Pathways","codeName":"BAM II: Business Analytics II"},{"name":"Business Analytics Practicum","program":"BAM","code":"BAM III","type":"Pathways","codeName":"BAM III: Business Analytics Practicum"},{"name":"Career Navigation and Exploration in Analytics","program":"BAM","code":"BAM IV","type":"Pathways","codeName":"BAM IV: Career Navigation and Exploration in Analytics"},{"name":"General Biology I (Molecular/Cellular)","program":"BIOLG","code":"BIOLG I","type":"Pillars","codeName":"BIOLG I: General Biology I (Molecular/Cellular)"},{"name":"General Biology II (Organismal/Ecology/Evolution)","program":"BIOLG","code":"BIOLG II","type":"Pillars","codeName":"BIOLG II: General Biology II (Organismal/Ecology/Evolution)"},{"name":"Cell Biology","program":"BIOLG","code":"BIOLG III","type":"Pillars","codeName":"BIOLG III: Cell Biology"},{"name":"Ecology","program":"BIOLG","code":"BIOLG IV","type":"Pillars","codeName":"BIOLG IV: Ecology"},{"name":"[Elective]","program":"BIOLG","code":"BIOLG IX","type":"Pillars","codeName":"BIOLG IX: [Elective]"},{"name":"Genetics","program":"BIOLG","code":"BIOLG V","type":"Pillars","codeName":"BIOLG V: Genetics"},{"name":"Anatomy & Physiology I","program":"BIOLG","code":"BIOLG VI","type":"Pillars","codeName":"BIOLG VI: Anatomy & Physiology I"},{"name":"Anatomy & Physiology II","program":"BIOLG","code":"BIOLG VII","type":"Pillars","codeName":"BIOLG VII: Anatomy & Physiology II"},{"name":"Microbiology","program":"BIOLG","code":"BIOLG VIII","type":"Pillars","codeName":"BIOLG VIII: Microbiology"},{"name":"Independent Research/Internship","program":"BIOLG","code":"BIOLG X","type":"Pillars","codeName":"BIOLG X: Independent Research/Internship"},{"name":"Seminar & Capstone","program":"BIOLG","code":"BIOLG XI","type":"Pillars","codeName":"BIOLG XI: Seminar & Capstone"},{"name":"Special Topics in Biology","program":"BIOLG","code":"BIOLG XII","type":"Pillars","codeName":"BIOLG XII: Special Topics in Biology"},{"name":"Financial Accounting","program":"BUSNS","code":"BUSNS I","type":"Pillars","codeName":"BUSNS I: Financial Accounting"},{"name":"Introduction to Business","program":"BUSNS","code":"BUSNS II","type":"Pillars","codeName":"BUSNS II: Introduction to Business"},{"name":"Managerial Accounting","program":"BUSNS","code":"BUSNS III","type":"Pillars","codeName":"BUSNS III: Managerial Accounting"},{"name":"Statistics for Business and Economics","program":"BUSNS","code":"BUSNS IV","type":"Pillars","codeName":"BUSNS IV: Statistics for Business and Economics"},{"name":"Corporate Finance","program":"BUSNS","code":"BUSNS IX","type":"Pillars","codeName":"BUSNS IX: Corporate Finance"},{"name":"Business Communication","program":"BUSNS","code":"BUSNS V","type":"Pillars","codeName":"BUSNS V: Business Communication"},{"name":"Excel for Business and Finance","program":"BUSNS","code":"BUSNS VI","type":"Pillars","codeName":"BUSNS VI: Excel for Business and Finance"},{"name":"Principles of Marketing","program":"BUSNS","code":"BUSNS VII","type":"Pillars","codeName":"BUSNS VII: Principles of Marketing"},{"name":"Business Law & Ethics","program":"BUSNS","code":"BUSNS VIII","type":"Pillars","codeName":"BUSNS VIII: Business Law & Ethics"},{"name":"Management Information Systems","program":"BUSNS","code":"BUSNS X","type":"Pillars","codeName":"BUSNS X: Management Information Systems"},{"name":"Organizational Behavior & Leadership","program":"BUSNS","code":"BUSNS XI","type":"Pillars","codeName":"BUSNS XI: Organizational Behavior & Leadership"},{"name":"Principles of Management","program":"BUSNS","code":"BUSNS XII","type":"Pillars","codeName":"BUSNS XII: Principles of Management"},{"name":"Personal Finance","program":"BUSNS","code":"BUSNS XIII","type":"Pillars","codeName":"BUSNS XIII: Personal Finance"},{"name":"Storytelling with Data","program":"BZMBA","code":"BZMBA I","type":"MBA","codeName":"BZMBA I: Storytelling with Data"},{"name":"Spreadsheet Modeling for Decision-Making","program":"BZMBA","code":"BZMBA II","type":"MBA","codeName":"BZMBA II: Spreadsheet Modeling for Decision-Making"},{"name":"Python for Business Analytics","program":"BZMBA","code":"BZMBA III","type":"MBA","codeName":"BZMBA III: Python for Business Analytics"},{"name":"Managing AI Projects","program":"BZMBA","code":"BZMBA IV","type":"MBA","codeName":"BZMBA IV: Managing AI Projects"},{"name":"Cloud Application Development","program":"CAD","code":"CAD I","type":"Pathways","codeName":"CAD I: Cloud Application Development"},{"name":"General Principles of Financial Planning","program":"CFP","code":"CFP 301","type":"Pathways","codeName":"CFP 301: General Principles of Financial Planning"},{"name":"Risk Management and Insurance Planning","program":"CFP","code":"CFP 302","type":"Pathways","codeName":"CFP 302: Risk Management and Insurance Planning"},{"name":"Investment Planning","program":"CFP","code":"CFP 303","type":"Pathways","codeName":"CFP 303: Investment Planning"},{"name":"Tax Planning","program":"CFP","code":"CFP 304","type":"Pathways","codeName":"CFP 304: Tax Planning"},{"name":"Retirement Savings & Income Planning","program":"CFP","code":"CFP 305","type":"Pathways","codeName":"CFP 305: Retirement Savings & Income Planning"},{"name":"Estate Planning","program":"CFP","code":"CFP 306","type":"Pathways","codeName":"CFP 306: Estate Planning"},{"name":"Financial Plan Development","program":"CFP","code":"CFP 307","type":"Pathways","codeName":"CFP 307: Financial Plan Development"},{"name":"General Chemistry I","program":"CHEMY","code":"CHEMY I","type":"Pillars","codeName":"CHEMY I: General Chemistry I"},{"name":"General Chemistry II","program":"CHEMY","code":"CHEMY II","type":"Pillars","codeName":"CHEMY II: General Chemistry II"},{"name":"Introduction to Chemistry (With Lab)","program":"CHEMY","code":"CHEMY III","type":"Pillars","codeName":"CHEMY III: Introduction to Chemistry (With Lab)"},{"name":"Organic Chemistry I","program":"CHEMY","code":"CHEMY IV","type":"Pillars","codeName":"CHEMY IV: Organic Chemistry I"},{"name":"Inorganic Chemistry","program":"CHEMY","code":"CHEMY IX","type":"Pillars","codeName":"CHEMY IX: Inorganic Chemistry"},{"name":"Organic Chemistry II","program":"CHEMY","code":"CHEMY V","type":"Pillars","codeName":"CHEMY V: Organic Chemistry II"},{"name":"Advanced Chemistry Elective (Advisor-approved 300/400-level)","program":"CHEMY","code":"CHEMY VI","type":"Pillars","codeName":"CHEMY VI: Advanced Chemistry Elective (Advisor-approved 300/400-level)"},{"name":"Analytical Chemistry","program":"CHEMY","code":"CHEMY VII","type":"Pillars","codeName":"CHEMY VII: Analytical Chemistry"},{"name":"Biochemistry","program":"CHEMY","code":"CHEMY VIII","type":"Pillars","codeName":"CHEMY VIII: Biochemistry"},{"name":"Physical Chemistry I (Thermo/Kinetics)","program":"CHEMY","code":"CHEMY X","type":"Pillars","codeName":"CHEMY X: Physical Chemistry I (Thermo/Kinetics)"},{"name":"Physical Chemistry II (Quantum/Spectroscopy)","program":"CHEMY","code":"CHEMY XI","type":"Pillars","codeName":"CHEMY XI: Physical Chemistry II (Quantum/Spectroscopy)"},{"name":"Independent Study","program":"CHEMY","code":"CHEMY XII","type":"Pillars","codeName":"CHEMY XII: Independent Study"},{"name":"Internship","program":"CHEMY","code":"CHEMY XIII","type":"Pillars","codeName":"CHEMY XIII: Internship"},{"name":"Senior Seminar I/II/Capstone Project","program":"CHEMY","code":"CHEMY XIV","type":"Pillars","codeName":"CHEMY XIV: Senior Seminar I/II/Capstone Project"},{"name":"Special Topics in Chemistry","program":"CHEMY","code":"CHEMY XV","type":"Pillars","codeName":"CHEMY XV: Special Topics in Chemistry"},{"name":"Undergraduate Research","program":"CHEMY","code":"CHEMY XVI","type":"Pillars","codeName":"CHEMY XVI: Undergraduate Research"},{"name":"Google Cloud Computing Foundations","program":"Cloud","code":"Cloud 0","type":"Pathways","codeName":"Cloud 0: Google Cloud Computing Foundations"},{"name":"Interpersonal Communication","program":"COMMS","code":"COMMS I","type":"Pillars","codeName":"COMMS I: Interpersonal Communication"},{"name":"Introduction to Communication Studies","program":"COMMS","code":"COMMS II","type":"Pillars","codeName":"COMMS II: Introduction to Communication Studies"},{"name":"Media and Culture","program":"COMMS","code":"COMMS III","type":"Pillars","codeName":"COMMS III: Media and Culture"},{"name":"Public Speaking","program":"COMMS","code":"COMMS IV","type":"Pillars","codeName":"COMMS IV: Public Speaking"},{"name":"Organizational Communication","program":"COMMS","code":"COMMS IX","type":"Pillars","codeName":"COMMS IX: Organizational Communication"},{"name":"Advertising and Promotion","program":"COMMS","code":"COMMS V","type":"Pillars","codeName":"COMMS V: Advertising and Promotion"},{"name":"Digital Communications","program":"COMMS","code":"COMMS VI","type":"Pillars","codeName":"COMMS VI: Digital Communications"},{"name":"Intercultural Communication","program":"COMMS","code":"COMMS VII","type":"Pillars","codeName":"COMMS VII: Intercultural Communication"},{"name":"Media Writing","program":"COMMS","code":"COMMS VIII","type":"Pillars","codeName":"COMMS VIII: Media Writing"},{"name":"Communication Capstone Seminar","program":"COMMS","code":"COMMS X","type":"Pillars","codeName":"COMMS X: Communication Capstone Seminar"},{"name":"Introduction to Computer Science","program":"COMPS","code":"COMPS I","type":"Pathways","codeName":"COMPS I: Introduction to Computer Science"},{"name":"Programming for Everyone I","program":"COMPS","code":"COMPS II","type":"Pathways","codeName":"COMPS II: Programming for Everyone I"},{"name":"Programming for Everyone II","program":"COMPS","code":"COMPS III","type":"Pathways","codeName":"COMPS III: Programming for Everyone II"},{"name":"Career Navigation and Exploration in Computer Science","program":"COMPS","code":"COMPS IV","type":"Pathways","codeName":"COMPS IV: Career Navigation and Exploration in Computer Science"},{"name":"Application Development I: Backend","program":"COMPS","code":"COMPS IX","type":"Pathways","codeName":"COMPS IX: Application Development I: Backend"},{"name":"Data Structures","program":"COMPS","code":"COMPS V","type":"Pathways","codeName":"COMPS V: Data Structures"},{"name":"Algorithms","program":"COMPS","code":"COMPS VI","type":"Pathways","codeName":"COMPS VI: Algorithms"},{"name":"Web Development","program":"COMPS","code":"COMPS VII","type":"Pathways","codeName":"COMPS VII: Web Development"},{"name":"Modern Technologies","program":"COMPS","code":"COMPS VIII","type":"Pathways","codeName":"COMPS VIII: Modern Technologies"},{"name":"Application Development II: Frontend","program":"COMPS","code":"COMPS X","type":"Pathways","codeName":"COMPS X: Application Development II: Frontend"},{"name":"Software Development","program":"COMPS","code":"COMPS XI","type":"Pathways","codeName":"COMPS XI: Software Development"},{"name":"Computer Systems","program":"COMPS","code":"COMPS XII","type":"Pathways","codeName":"COMPS XII: Computer Systems"},{"name":"Computer Science Capstone","program":"COMPS","code":"COMPS XIII","type":"Pathways","codeName":"COMPS XIII: Computer Science Capstone"},{"name":"Introduction to Criminal Justice","program":"CRIMJ","code":"CRIMJ I","type":"Pillars","codeName":"CRIMJ I: Introduction to Criminal Justice"},{"name":"Correctional Philosophy","program":"CRIMJ","code":"CRIMJ II","type":"Pillars","codeName":"CRIMJ II: Correctional Philosophy"},{"name":"Law Enforcement / Policing","program":"CRIMJ","code":"CRIMJ III","type":"Pillars","codeName":"CRIMJ III: Law Enforcement / Policing"},{"name":"Corrections","program":"CRIMJ","code":"CRIMJ IV","type":"Pillars","codeName":"CRIMJ IV: Corrections"},{"name":"Ethics in Criminal Justice","program":"CRIMJ","code":"CRIMJ IX","type":"Pillars","codeName":"CRIMJ IX: Ethics in Criminal Justice"},{"name":"Courts & Criminal Procedure","program":"CRIMJ","code":"CRIMJ V","type":"Pillars","codeName":"CRIMJ V: Courts & Criminal Procedure"},{"name":"Drugs & Crime","program":"CRIMJ","code":"CRIMJ VI","type":"Pillars","codeName":"CRIMJ VI: Drugs & Crime"},{"name":"Juvenile Justice & Delinquency","program":"CRIMJ","code":"CRIMJ VII","type":"Pillars","codeName":"CRIMJ VII: Juvenile Justice & Delinquency"},{"name":"Capstone/Research","program":"CRIMJ","code":"CRIMJ VIII","type":"Pillars","codeName":"CRIMJ VIII: Capstone/Research"},{"name":"Internet History, Technology, and Security","program":"CSC","code":"CSC I","type":"Pathways","codeName":"CSC I: Internet History, Technology, and Security"},{"name":"Programming for Everyone I (CSC)","program":"CSC","code":"CSC II","type":"Pathways","codeName":"CSC II: Programming for Everyone I (CSC)"},{"name":"Programming for Everyone II (CSC)","program":"CSC","code":"CSC III","type":"Pathways","codeName":"CSC III: Programming for Everyone II (CSC)"},{"name":"Web Development (CSC)","program":"CSC","code":"CSC IV","type":"Pathways","codeName":"CSC IV: Web Development (CSC)"},{"name":"Application Development I (CSC)","program":"CSC","code":"CSC V","type":"Pathways","codeName":"CSC V: Application Development I (CSC)"},{"name":"Application Development II (CSC)","program":"CSC","code":"CSC VI","type":"Pathways","codeName":"CSC VI: Application Development II (CSC)"},{"name":"How to Get a Coding Job (CSC)","program":"CSC","code":"CSC VII","type":"Pathways","codeName":"CSC VII: How to Get a Coding Job (CSC)"},{"name":"Introduction to C - How Computers Really Work (CSM)","program":"CSM","code":"CSM I","type":"Pathways","codeName":"CSM I: Introduction to C - How Computers Really Work (CSM)"},{"name":"Inside of a Microprocessor (CSM)","program":"CSM","code":"CSM II","type":"Pathways","codeName":"CSM II: Inside of a Microprocessor (CSM)"},{"name":"Data Structures (CSM)","program":"CSM","code":"CSM III","type":"Pathways","codeName":"CSM III: Data Structures (CSM)"},{"name":"Algorithms (CSM)","program":"CSM","code":"CSM IV","type":"Pathways","codeName":"CSM IV: Algorithms (CSM)"},{"name":"Product Development","program":"CSM","code":"CSM V","type":"Pathways","codeName":"CSM V: Product Development"},{"name":"Capstone Project (CSM)","program":"CSM","code":"CSM VI","type":"Pathways","codeName":"CSM VI: Capstone Project (CSM)"},{"name":"Introduction to Cybersecurity","program":"CYBER","code":"CYBER I","type":"Pathways","codeName":"CYBER I: Introduction to Cybersecurity"},{"name":"Career Navigation and Exploration in Cybersecurity","program":"CYBER","code":"CYBER II","type":"Pathways","codeName":"CYBER II: Career Navigation and Exploration in Cybersecurity"},{"name":"Network and System Security","program":"CYBER","code":"CYBER III","type":"Pathways","codeName":"CYBER III: Network and System Security"},{"name":"Cybercrime and Governance","program":"CYBER","code":"CYBER IV","type":"Pathways","codeName":"CYBER IV: Cybercrime and Governance"},{"name":"Security Operations","program":"CYBER","code":"CYBER V","type":"Pathways","codeName":"CYBER V: Security Operations"},{"name":"Ethical Hacking","program":"CYBER","code":"CYBER VI","type":"Pathways","codeName":"CYBER VI: Ethical Hacking"},{"name":"The Future of Cybersecurity","program":"CYBER","code":"CYBER VII","type":"Pathways","codeName":"CYBER VII: The Future of Cybersecurity"},{"name":"Cybersecurity Capstone","program":"CYBER","code":"CYBER VIII","type":"Pathways","codeName":"CYBER VIII: Cybersecurity Capstone"},{"name":"Information Governance, Risk Management, and Compliance","program":"CYMBA","code":"CYMBA I","type":"MBA","codeName":"CYMBA I: Information Governance, Risk Management, and Compliance"},{"name":"Network Architectures for Cyber Managers","program":"CYMBA","code":"CYMBA II","type":"MBA","codeName":"CYMBA II: Network Architectures for Cyber Managers"},{"name":"Cyber Risk Management and Strategy","program":"CYMBA","code":"CYMBA III","type":"MBA","codeName":"CYMBA III: Cyber Risk Management and Strategy"},{"name":"Executive Cyber Defense","program":"CYMBA","code":"CYMBA IV","type":"MBA","codeName":"CYMBA IV: Executive Cyber Defense"},{"name":"Introduction to Cybersecurity (CYS)","program":"CYS","code":"CYS I","type":"Pathways","codeName":"CYS I: Introduction to Cybersecurity (CYS)"},{"name":"Cybercrime and Governance (CYS)","program":"CYS","code":"CYS II","type":"Pathways","codeName":"CYS II: Cybercrime and Governance (CYS)"},{"name":"Modern Cybersecurity (CYS)","program":"CYS","code":"CYS III","type":"Pathways","codeName":"CYS III: Modern Cybersecurity (CYS)"},{"name":"Network and System Security (CYS)","program":"CYS","code":"CYS IV","type":"Pathways","codeName":"CYS IV: Network and System Security (CYS)"},{"name":"Cyber Forensics (CYS)","program":"CYS","code":"CYS V","type":"Pathways","codeName":"CYS V: Cyber Forensics (CYS)"},{"name":"Capstone Project - Ethical Hacking (CYS)","program":"CYS","code":"CYS VI","type":"Pathways","codeName":"CYS VI: Capstone Project - Ethical Hacking (CYS)"},{"name":"How to Get a Job in Cybersecurity (CYS)","program":"CYS","code":"CYS VII","type":"Pathways","codeName":"CYS VII: How to Get a Job in Cybersecurity (CYS)"},{"name":"Foundations of Data Analytics I","program":"DAM","code":"DAM I","type":"Pathways","codeName":"DAM I: Foundations of Data Analytics I"},{"name":"Foundations of Data Analytics II","program":"DAM","code":"DAM II","type":"Pathways","codeName":"DAM II: Foundations of Data Analytics II"},{"name":"Principles and Techniques of Data Analytics I (DAM)","program":"DAM","code":"DAM III","type":"Pathways","codeName":"DAM III: Principles and Techniques of Data Analytics I (DAM)"},{"name":"Principles and Techniques of Data Analytics II","program":"DAM","code":"DAM IV","type":"Pathways","codeName":"DAM IV: Principles and Techniques of Data Analytics II"},{"name":"Data Analytics Practicum (DAM)","program":"DAM","code":"DAM V","type":"Pathways","codeName":"DAM V: Data Analytics Practicum (DAM)"},{"name":"Introduction to Digital Marketing","program":"DMARK","code":"DMARK I","type":"Pathways","codeName":"DMARK I: Introduction to Digital Marketing"},{"name":"Career Navigation and Exploration in Digital Marketing","program":"DMARK","code":"DMARK II","type":"Pathways","codeName":"DMARK II: Career Navigation and Exploration in Digital Marketing"},{"name":"Going Viral and Growth Hacking","program":"DMARK","code":"DMARK III","type":"Pathways","codeName":"DMARK III: Going Viral and Growth Hacking"},{"name":"Social Media Marketing, Brand Awareness, and Engagement","program":"DMARK","code":"DMARK IV","type":"Pathways","codeName":"DMARK IV: Social Media Marketing, Brand Awareness, and Engagement"},{"name":"Lifecycle and Email Marketing","program":"DMARK","code":"DMARK V","type":"Pathways","codeName":"DMARK V: Lifecycle and Email Marketing"},{"name":"Digital Marketing Analytics and Experimentation","program":"DMARK","code":"DMARK VI","type":"Pathways","codeName":"DMARK VI: Digital Marketing Analytics and Experimentation"},{"name":"Growth Mktg. and Multi-Channel Mktg. Capstone","program":"DMARK","code":"DMARK VII","type":"Pathways","codeName":"DMARK VII: Growth Mktg. and Multi-Channel Mktg. Capstone"},{"name":"Social Media Marketing (DMC)","program":"DMC","code":"DMC I","type":"Pathways","codeName":"DMC I: Social Media Marketing (DMC)"},{"name":"Email Marketing (DMC)","program":"DMC","code":"DMC II","type":"Pathways","codeName":"DMC II: Email Marketing (DMC)"},{"name":"SEO and SEM (DMC)","program":"DMC","code":"DMC III","type":"Pathways","codeName":"DMC III: SEO and SEM (DMC)"},{"name":"Digital Marketing Analytics (DMC)","program":"DMC","code":"DMC IV","type":"Pathways","codeName":"DMC IV: Digital Marketing Analytics (DMC)"},{"name":"Viral and Organic Growth (DMC)","program":"DMC","code":"DMC V","type":"Pathways","codeName":"DMC V: Viral and Organic Growth (DMC)"},{"name":"How to Get a Job in Digital Marketing (DMC)","program":"DMC","code":"DMC VI","type":"Pathways","codeName":"DMC VI: How to Get a Job in Digital Marketing (DMC)"},{"name":"Data Science I","program":"DSM","code":"DSM I","type":"Pathways","codeName":"DSM I: Data Science I"},{"name":"Data Science II","program":"DSM","code":"DSM II","type":"Pathways","codeName":"DSM II: Data Science II"},{"name":"AI and Machine Learning","program":"DSM","code":"DSM III","type":"Pathways","codeName":"DSM III: AI and Machine Learning"},{"name":"Data Science Practicum","program":"DSM","code":"DSM IV","type":"Pathways","codeName":"DSM IV: Data Science Practicum"},{"name":"Career Navigation and Exploration in Data Science","program":"DSM","code":"DSM V","type":"Pathways","codeName":"DSM V: Career Navigation and Exploration in Data Science"},{"name":"Principles of Macroeconomics","program":"ECONM","code":"ECONM I","type":"Pillars","codeName":"ECONM I: Principles of Macroeconomics"},{"name":"Principles of Microeconomics","program":"ECONM","code":"ECONM II","type":"Pillars","codeName":"ECONM II: Principles of Microeconomics"},{"name":"Applied Econometrics","program":"ECONM","code":"ECONM III","type":"Pillars","codeName":"ECONM III: Applied Econometrics"},{"name":"Data Analytics for Economics / Applied Analytics","program":"ECONM","code":"ECONM IV","type":"Pillars","codeName":"ECONM IV: Data Analytics for Economics / Applied Analytics"},{"name":"Intermediate Macroeconomics","program":"ECONM","code":"ECONM IX","type":"Pillars","codeName":"ECONM IX: Intermediate Macroeconomics"},{"name":"Econometrics","program":"ECONM","code":"ECONM V","type":"Pillars","codeName":"ECONM V: Econometrics"},{"name":"Economic Development","program":"ECONM","code":"ECONM VI","type":"Pillars","codeName":"ECONM VI: Economic Development"},{"name":"Game Theory","program":"ECONM","code":"ECONM VII","type":"Pillars","codeName":"ECONM VII: Game Theory"},{"name":"History of Economic Thought / Economic History","program":"ECONM","code":"ECONM VIII","type":"Pillars","codeName":"ECONM VIII: History of Economic Thought / Economic History"},{"name":"Intermediate Microeconomics","program":"ECONM","code":"ECONM X","type":"Pillars","codeName":"ECONM X: Intermediate Microeconomics"},{"name":"International Economics (Trade & Policy)","program":"ECONM","code":"ECONM XI","type":"Pillars","codeName":"ECONM XI: International Economics (Trade & Policy)"},{"name":"Internship in Economics","program":"ECONM","code":"ECONM XII","type":"Pillars","codeName":"ECONM XII: Internship in Economics"},{"name":"Money and Banking / Financial Systems","program":"ECONM","code":"ECONM XIII","type":"Pillars","codeName":"ECONM XIII: Money and Banking / Financial Systems"},{"name":"Topics in Economics (rotating)","program":"ECONM","code":"ECONM XIV","type":"Pillars","codeName":"ECONM XIV: Topics in Economics (rotating)"},{"name":"Directed Research / Senior Thesis","program":"ECONM","code":"ECONM XV","type":"Pillars","codeName":"ECONM XV: Directed Research / Senior Thesis"},{"name":"Senior Seminar / Capstone in Economics","program":"ECONM","code":"ECONM XVI","type":"Pillars","codeName":"ECONM XVI: Senior Seminar / Capstone in Economics"},{"name":"Composition I","program":"ENGLH","code":"ENGLH I","type":"Pillars","codeName":"ENGLH I: Composition I"},{"name":"Composition II","program":"ENGLH","code":"ENGLH II","type":"Pillars","codeName":"ENGLH II: Composition II"},{"name":"Introduction to Literary Studies","program":"ENGLH","code":"ENGLH III","type":"Pillars","codeName":"ENGLH III: Introduction to Literary Studies"},{"name":"Persuasion and Arguments","program":"ENGLH","code":"ENGLH IV","type":"Pillars","codeName":"ENGLH IV: Persuasion and Arguments"},{"name":"Writing for New Media","program":"ENGLH","code":"ENGLH IX","type":"Pillars","codeName":"ENGLH IX: Writing for New Media"},{"name":"Survey of American Literature I (Beginnings–1865)","program":"ENGLH","code":"ENGLH V","type":"Pillars","codeName":"ENGLH V: Survey of American Literature I (Beginnings–1865)"},{"name":"Survey of American Literature II (1865–Present)","program":"ENGLH","code":"ENGLH VI","type":"Pillars","codeName":"ENGLH VI: Survey of American Literature II (1865–Present)"},{"name":"Survey of British Literature I (Beginnings–1700)","program":"ENGLH","code":"ENGLH VII","type":"Pillars","codeName":"ENGLH VII: Survey of British Literature I (Beginnings–1700)"},{"name":"Survey of British Literature II (1700–Present)","program":"ENGLH","code":"ENGLH VIII","type":"Pillars","codeName":"ENGLH VIII: Survey of British Literature II (1700–Present)"},{"name":"Creative Nonfiction Workshop","program":"ENGLH","code":"ENGLH X","type":"Pillars","codeName":"ENGLH X: Creative Nonfiction Workshop"},{"name":"Editing & Publishing","program":"ENGLH","code":"ENGLH XI","type":"Pillars","codeName":"ENGLH XI: Editing & Publishing"},{"name":"Genre Workshop (Fiction or Poetry)","program":"ENGLH","code":"ENGLH XII","type":"Pillars","codeName":"ENGLH XII: Genre Workshop (Fiction or Poetry)"},{"name":"Introduction to Creative Writing","program":"ENGLH","code":"ENGLH XIII","type":"Pillars","codeName":"ENGLH XIII: Introduction to Creative Writing"},{"name":"Literary Theory & Criticism","program":"ENGLH","code":"ENGLH XIV","type":"Pillars","codeName":"ENGLH XIV: Literary Theory & Criticism"},{"name":"Advanced Creative Writing Workshop","program":"ENGLH","code":"ENGLH XIX","type":"Pillars","codeName":"ENGLH XIX: Advanced Creative Writing Workshop"},{"name":"Modernism / 20th Century Literature","program":"ENGLH","code":"ENGLH XV","type":"Pillars","codeName":"ENGLH XV: Modernism / 20th Century Literature"},{"name":"Professional / Technical Writing","program":"ENGLH","code":"ENGLH XVI","type":"Pillars","codeName":"ENGLH XVI: Professional / Technical Writing"},{"name":"Romantic Literature","program":"ENGLH","code":"ENGLH XVII","type":"Pillars","codeName":"ENGLH XVII: Romantic Literature"},{"name":"Victorian Literature","program":"ENGLH","code":"ENGLH XVIII","type":"Pillars","codeName":"ENGLH XVIII: Victorian Literature"},{"name":"Advanced Manuscript Workshop","program":"ENGLH","code":"ENGLH XX","type":"Pillars","codeName":"ENGLH XX: Advanced Manuscript Workshop"},{"name":"Internship / Field Experience","program":"ENGLH","code":"ENGLH XXI","type":"Pillars","codeName":"ENGLH XXI: Internship / Field Experience"},{"name":"Senior Seminar / Writing Capstone","program":"ENGLH","code":"ENGLH XXII","type":"Pillars","codeName":"ENGLH XXII: Senior Seminar / Writing Capstone"},{"name":"Introduction to Esports Management","program":"ESM","code":"ESM I","type":"Pathways","codeName":"ESM I: Introduction to Esports Management"},{"name":"Convention, Event and Trade Show Planning","program":"ESM","code":"ESM II","type":"Pathways","codeName":"ESM II: Convention, Event and Trade Show Planning"},{"name":"Distribution of Games","program":"ESM","code":"ESM III","type":"Pathways","codeName":"ESM III: Distribution of Games"},{"name":"Managerial Finance","program":"FIMBA","code":"FIMBA I","type":"MBA","codeName":"FIMBA I: Managerial Finance"},{"name":"Capital Markets and Investing","program":"FIMBA","code":"FIMBA II","type":"MBA","codeName":"FIMBA II: Capital Markets and Investing"},{"name":"Financial Statements Analysis and Valuation","program":"FIMBA","code":"FIMBA III","type":"MBA","codeName":"FIMBA III: Financial Statements Analysis and Valuation"},{"name":"Frontiers of Finance","program":"FIMBA","code":"FIMBA IV","type":"MBA","codeName":"FIMBA IV: Frontiers of Finance"},{"name":"Excel for Business & Finance","program":"FINAN","code":"FINAN I","type":"Pathways","codeName":"FINAN I: Excel for Business & Finance"},{"name":"Career Navigation and Exploration in Finance","program":"FINAN","code":"FINAN II","type":"Pathways","codeName":"FINAN II: Career Navigation and Exploration in Finance"},{"name":"Financial Markets and Institutions","program":"FINAN","code":"FINAN III","type":"Pathways","codeName":"FINAN III: Financial Markets and Institutions"},{"name":"Corporate Finance","program":"FINAN","code":"FINAN IV","type":"Pathways","codeName":"FINAN IV: Corporate Finance"},{"name":"Investments","program":"FINAN","code":"FINAN V","type":"Pathways","codeName":"FINAN V: Investments"},{"name":"Financial Modeling and Valuation","program":"FINAN","code":"FINAN VI","type":"Pathways","codeName":"FINAN VI: Financial Modeling and Valuation"},{"name":"Portfolio Management","program":"FINAN","code":"FINAN VII","type":"Pathways","codeName":"FINAN VII: Portfolio Management"},{"name":"Future of Finance","program":"FINAN","code":"FINAN VIII","type":"Pathways","codeName":"FINAN VIII: Future of Finance"},{"name":"Advanced Corporate Finance","program":"FINAN","code":"FINAN IX","type":"Pathways","codeName":"FINAN IX: Advanced Corporate Finance"},{"name":"Strategic Financial Analysis Capstone","program":"FINAN","code":"FINAN X","type":"Pathways","codeName":"FINAN X: Strategic Financial Analysis Capstone"},{"name":"Introduction to Games","program":"GDM","code":"GDM I","type":"Pathways","codeName":"GDM I: Introduction to Games"},{"name":"Content and Systems Design","program":"GDM","code":"GDM II","type":"Pathways","codeName":"GDM II: Content and Systems Design"},{"name":"Unity I","program":"GDM","code":"GDM III","type":"Pathways","codeName":"GDM III: Unity I"},{"name":"C# Programming","program":"GDM","code":"GDM IV","type":"Pathways","codeName":"GDM IV: C# Programming"},{"name":"Unity II: Advanced Unity Programming","program":"GDM","code":"GDM V","type":"Pathways","codeName":"GDM V: Unity II: Advanced Unity Programming"},{"name":"Capstone Project: Building a Game","program":"GDM","code":"GDM VI","type":"Pathways","codeName":"GDM VI: Capstone Project: Building a Game"},{"name":"Inside U.S. Healthcare Policy","program":"HADMN","code":"HADMN I","type":"Pathways","codeName":"HADMN I: Inside U.S. Healthcare Policy"},{"name":"Career Navigation and Exploration in Healthcare Administration","program":"HADMN","code":"HADMN II","type":"Pathways","codeName":"HADMN II: Career Navigation and Exploration in Healthcare Administration"},{"name":"Healthcare Justice, Law, and Ethics","program":"HADMN","code":"HADMN III","type":"Pathways","codeName":"HADMN III: Healthcare Justice, Law, and Ethics"},{"name":"Strategic Healthcare Operations","program":"HADMN","code":"HADMN IV","type":"Pathways","codeName":"HADMN IV: Strategic Healthcare Operations"},{"name":"Healthcare Finance (HADMN)","program":"HADMN","code":"HADMN V","type":"Pathways","codeName":"HADMN V: Healthcare Finance (HADMN)"},{"name":"Data-Driven Healthcare: Analytics, IT, and AI","program":"HADMN","code":"HADMN VI","type":"Pathways","codeName":"HADMN VI: Data-Driven Healthcare: Analytics, IT, and AI"},{"name":"Healthcare Innovation - Capstone","program":"HADMN","code":"HADMN VII","type":"Pathways","codeName":"HADMN VII: Healthcare Innovation - Capstone"},{"name":"Health Systems of The United States (HAM)","program":"HAM","code":"HAM I","type":"Pathways","codeName":"HAM I: Health Systems of The United States (HAM)"},{"name":"Health Law and Ethics (HAM)","program":"HAM","code":"HAM II","type":"Pathways","codeName":"HAM II: Health Law and Ethics (HAM)"},{"name":"Health Data and Analytics (HAM)","program":"HAM","code":"HAM III","type":"Pathways","codeName":"HAM III: Health Data and Analytics (HAM)"},{"name":"Healthcare Finance (HAM)","program":"HAM","code":"HAM IV","type":"Pathways","codeName":"HAM IV: Healthcare Finance (HAM)"},{"name":"Healthcare Service Operations (HAM)","program":"HAM","code":"HAM V","type":"Pathways","codeName":"HAM V: Healthcare Service Operations (HAM)"},{"name":"Healthcare Strategy Capstone (HAM)","program":"HAM","code":"HAM VI","type":"Pathways","codeName":"HAM VI: Healthcare Strategy Capstone (HAM)"},{"name":"Structure and Economics of the US Healthcare System","program":"HAMBA","code":"HAMBA I","type":"MBA","codeName":"HAMBA I: Structure and Economics of the US Healthcare System"},{"name":"Management of Healthcare Organizations","program":"HAMBA","code":"HAMBA II","type":"MBA","codeName":"HAMBA II: Management of Healthcare Organizations"},{"name":"Data Analysis for Healthcare Management","program":"HAMBA","code":"HAMBA III","type":"MBA","codeName":"HAMBA III: Data Analysis for Healthcare Management"},{"name":"Healthcare Finance","program":"HAMBA","code":"HAMBA IV","type":"MBA","codeName":"HAMBA IV: Healthcare Finance"},{"name":"U.S. History since 1877","program":"HISTY","code":"HISTY I","type":"Pillars","codeName":"HISTY I: U.S. History since 1877"},{"name":"U.S. History to 1877","program":"HISTY","code":"HISTY II","type":"Pillars","codeName":"HISTY II: U.S. History to 1877"},{"name":"World Civilizations I (Ancient–1500)","program":"HISTY","code":"HISTY III","type":"Pillars","codeName":"HISTY III: World Civilizations I (Ancient–1500)"},{"name":"World Civilizations II (1500–Present)","program":"HISTY","code":"HISTY IV","type":"Pillars","codeName":"HISTY IV: World Civilizations II (1500–Present)"},{"name":"Modern Europe (1789–Present)","program":"HISTY","code":"HISTY IX","type":"Pillars","codeName":"HISTY IX: Modern Europe (1789–Present)"},{"name":"Ancient Mediterranean / Greeks & Romans","program":"HISTY","code":"HISTY V","type":"Pillars","codeName":"HISTY V: Ancient Mediterranean / Greeks & Romans"},{"name":"Introduction to East Asian History","program":"HISTY","code":"HISTY VI","type":"Pillars","codeName":"HISTY VI: Introduction to East Asian History"},{"name":"Medieval & Renaissance Europe","program":"HISTY","code":"HISTY VII","type":"Pillars","codeName":"HISTY VII: Medieval & Renaissance Europe"},{"name":"Latin America (Colonial to Present)","program":"HISTY","code":"HISTY VIII","type":"Pillars","codeName":"HISTY VIII: Latin America (Colonial to Present)"},{"name":"The Modern Middle East","program":"HISTY","code":"HISTY X","type":"Pillars","codeName":"HISTY X: The Modern Middle East"},{"name":"Senior Seminar / Thesis","program":"HISTY","code":"HISTY XI","type":"Pillars","codeName":"HISTY XI: Senior Seminar / Thesis"},{"name":"Training and Development","program":"HRM","code":"HRM I","type":"Pathways","codeName":"HRM I: Training and Development"},{"name":"Total Compensation Management","program":"HRM","code":"HRM II","type":"Pathways","codeName":"HRM II: Total Compensation Management"},{"name":"Employment and Labor Law","program":"HRM","code":"HRM III","type":"Pathways","codeName":"HRM III: Employment and Labor Law"},{"name":"Human Resource Risk Management","program":"HRM","code":"HRM IV","type":"Pathways","codeName":"HRM IV: Human Resource Risk Management"},{"name":"Introduction to Information Technology Systems","program":"ITM","code":"ITM I","type":"Pathways","codeName":"ITM I: Introduction to Information Technology Systems"},{"name":"Networking Technologies and Telecommunications","program":"ITM","code":"ITM II","type":"Pathways","codeName":"ITM II: Networking Technologies and Telecommunications"},{"name":"PostgreSQL","program":"ITM","code":"ITM III","type":"Pathways","codeName":"ITM III: PostgreSQL"},{"name":"Operating Systems and Architecture","program":"ITM","code":"ITM IV","type":"Pathways","codeName":"ITM IV: Operating Systems and Architecture"},{"name":"Information Security and Data Protection","program":"ITM","code":"ITM V","type":"Pathways","codeName":"ITM V: Information Security and Data Protection"},{"name":"Information Technology Capstone","program":"ITM","code":"ITM VI","type":"Pathways","codeName":"ITM VI: Information Technology Capstone"},{"name":"Calculus I","program":"MATHS","code":"MATHS I","type":"Pillars","codeName":"MATHS I: Calculus I"},{"name":"Calculus II","program":"MATHS","code":"MATHS II","type":"Pillars","codeName":"MATHS II: Calculus II"},{"name":"College Algebra / Quantitative Reasoning","program":"MATHS","code":"MATHS III","type":"Pillars","codeName":"MATHS III: College Algebra / Quantitative Reasoning"},{"name":"Precalculus","program":"MATHS","code":"MATHS IV","type":"Pillars","codeName":"MATHS IV: Precalculus"},{"name":"Abstract Algebra","program":"MATHS","code":"MATHS IX","type":"Pillars","codeName":"MATHS IX: Abstract Algebra"},{"name":"Calculus III","program":"MATHS","code":"MATHS V","type":"Pillars","codeName":"MATHS V: Calculus III"},{"name":"Discrete Mathematics","program":"MATHS","code":"MATHS VI","type":"Pillars","codeName":"MATHS VI: Discrete Mathematics"},{"name":"Linear Algebra","program":"MATHS","code":"MATHS VII","type":"Pillars","codeName":"MATHS VII: Linear Algebra"},{"name":"Statistics","program":"MATHS","code":"MATHS VIII","type":"Pillars","codeName":"MATHS VIII: Statistics"},{"name":"Differential Equations","program":"MATHS","code":"MATHS X","type":"Pillars","codeName":"MATHS X: Differential Equations"},{"name":"Geometry / College Geometry","program":"MATHS","code":"MATHS XI","type":"Pillars","codeName":"MATHS XI: Geometry / College Geometry"},{"name":"Real Analysis / Advanced Calculus","program":"MATHS","code":"MATHS XII","type":"Pillars","codeName":"MATHS XII: Real Analysis / Advanced Calculus"},{"name":"Senior Seminar / Capstone","program":"MATHS","code":"MATHS XIII","type":"Pillars","codeName":"MATHS XIII: Senior Seminar / Capstone"},{"name":"Introduction to Nutrition","program":"NDM","code":"NDM I","type":"Pathways","codeName":"NDM I: Introduction to Nutrition"},{"name":"Food Science","program":"NDM","code":"NDM II","type":"Pathways","codeName":"NDM II: Food Science"},{"name":"Food Economics","program":"NDM","code":"NDM III","type":"Pathways","codeName":"NDM III: Food Economics"},{"name":"Lifecycle Nutrition I","program":"NDM","code":"NDM IV","type":"Pathways","codeName":"NDM IV: Lifecycle Nutrition I"},{"name":"Lifecycle Nutrition II","program":"NDM","code":"NDM V","type":"Pathways","codeName":"NDM V: Lifecycle Nutrition II"},{"name":"Medical Nutrition Therapy","program":"NDM","code":"NDM VI","type":"Pathways","codeName":"NDM VI: Medical Nutrition Therapy"},{"name":"Neuroscience Foundations","program":"NSM","code":"NSM I","type":"Pathways","codeName":"NSM I: Neuroscience Foundations"},{"name":"Biological Basis of Perception and Movement","program":"NSM","code":"NSM II","type":"Pathways","codeName":"NSM II: Biological Basis of Perception and Movement"},{"name":"Cognitive Neuroscience","program":"NSM","code":"NSM III","type":"Pathways","codeName":"NSM III: Cognitive Neuroscience"},{"name":"Clinical Neuropathology","program":"NSM","code":"NSM IV","type":"Pathways","codeName":"NSM IV: Clinical Neuropathology"},{"name":"Introduction to Public Administration","program":"PAM","code":"PAM I","type":"Pathways","codeName":"PAM I: Introduction to Public Administration"},{"name":"State and Local Government Administration","program":"PAM","code":"PAM II","type":"Pathways","codeName":"PAM II: State and Local Government Administration"},{"name":"Public Budgeting and Finance","program":"PAM","code":"PAM III","type":"Pathways","codeName":"PAM III: Public Budgeting and Finance"},{"name":"Public Administration Capstone","program":"PAM","code":"PAM IV","type":"Pathways","codeName":"PAM IV: Public Administration Capstone"},{"name":"Introduction to Philosophy","program":"PHILO","code":"PHILO I","type":"Pillars","codeName":"PHILO I: Introduction to Philosophy"},{"name":"History of Public Health","program":"PHM","code":"PHM I","type":"Pathways","codeName":"PHM I: History of Public Health"},{"name":"Epidemiology","program":"PHM","code":"PHM II","type":"Pathways","codeName":"PHM II: Epidemiology"},{"name":"Health Services","program":"PHM","code":"PHM III","type":"Pathways","codeName":"PHM III: Health Services"},{"name":"Public Health Studies I: Current Topics and Politics","program":"PHM","code":"PHM IV","type":"Pathways","codeName":"PHM IV: Public Health Studies I: Current Topics and Politics"},{"name":"Public Health Studies II: Demographics, Geo-Spatial Mapping, and Qualitative Research","program":"PHM","code":"PHM V","type":"Pathways","codeName":"PHM V: Public Health Studies II: Demographics, Geo-Spatial Mapping, and Qualitative Research"},{"name":"Health Economics","program":"PHM","code":"PHM VI","type":"Pathways","codeName":"PHM VI: Health Economics"},{"name":"General Physics I (Mechanics)","program":"PHYSC","code":"PHYSC I","type":"Pillars","codeName":"PHYSC I: General Physics I (Mechanics)"},{"name":"General Physics II (Electricity, Magnetism & Waves)","program":"PHYSC","code":"PHYSC II","type":"Pillars","codeName":"PHYSC II: General Physics II (Electricity, Magnetism & Waves)"},{"name":"Astronomy / Astrophysics","program":"PHYSC","code":"PHYSC III","type":"Pillars","codeName":"PHYSC III: Astronomy / Astrophysics"},{"name":"Electricity & Magnetism","program":"PHYSC","code":"PHYSC IV","type":"Pillars","codeName":"PHYSC IV: Electricity & Magnetism"},{"name":"Waves & Optics","program":"PHYSC","code":"PHYSC IX","type":"Pillars","codeName":"PHYSC IX: Waves & Optics"},{"name":"Materials / Solid State Physics","program":"PHYSC","code":"PHYSC V","type":"Pillars","codeName":"PHYSC V: Materials / Solid State Physics"},{"name":"Mechanics / Analytical Mechanics","program":"PHYSC","code":"PHYSC VI","type":"Pillars","codeName":"PHYSC VI: Mechanics / Analytical Mechanics"},{"name":"Modern & Quantum Physics","program":"PHYSC","code":"PHYSC VII","type":"Pillars","codeName":"PHYSC VII: Modern & Quantum Physics"},{"name":"Thermodynamics / Statistical Physics","program":"PHYSC","code":"PHYSC VIII","type":"Pillars","codeName":"PHYSC VIII: Thermodynamics / Statistical Physics"},{"name":"Advanced Topics in Physics","program":"PHYSC","code":"PHYSC X","type":"Pillars","codeName":"PHYSC X: Advanced Topics in Physics"},{"name":"Capstone / Senior Project / Thesis","program":"PHYSC","code":"PHYSC XI","type":"Pillars","codeName":"PHYSC XI: Capstone / Senior Project / Thesis"},{"name":"Introduction to Project Management (PMM)","program":"PMM","code":"PMM I","type":"Pathways","codeName":"PMM I: Introduction to Project Management (PMM)"},{"name":"Project Planning (PMM)","program":"PMM","code":"PMM II","type":"Pathways","codeName":"PMM II: Project Planning (PMM)"},{"name":"Project Execution, Monitoring & Control, Implementation & Closure (PMM)","program":"PMM","code":"PMM III","type":"Pathways","codeName":"PMM III: Project Execution, Monitoring & Control, Implementation & Closure (PMM)"},{"name":"Advanced Project Management - Practicum (PMM)","program":"PMM","code":"PMM IV","type":"Pathways","codeName":"PMM IV: Advanced Project Management - Practicum (PMM)"},{"name":"American Government","program":"POSCI","code":"POSCI I","type":"Pillars","codeName":"POSCI I: American Government"},{"name":"Project Management Fundamentals","program":"PROJM","code":"PROJM I","type":"Pathways","codeName":"PROJM I: Project Management Fundamentals"},{"name":"Career Navigation and Exploration in Business & Project Management","program":"PROJM","code":"PROJM II","type":"Pathways","codeName":"PROJM II: Career Navigation and Exploration in Business & Project Management"},{"name":"Predictive Project Planning","program":"PROJM","code":"PROJM III","type":"Pathways","codeName":"PROJM III: Predictive Project Planning"},{"name":"Managing Risk and Uncertainty","program":"PROJM","code":"PROJM IV","type":"Pathways","codeName":"PROJM IV: Managing Risk and Uncertainty"},{"name":"Project Execution, Monitoring and Control","program":"PROJM","code":"PROJM V","type":"Pathways","codeName":"PROJM V: Project Execution, Monitoring and Control"},{"name":"Agile Frameworks and Methodologies","program":"PROJM","code":"PROJM VI","type":"Pathways","codeName":"PROJM VI: Agile Frameworks and Methodologies"},{"name":"Full-Cycle Project Management","program":"PROJM","code":"PROJM VII","type":"Pathways","codeName":"PROJM VII: Full-Cycle Project Management"},{"name":"Relationship-Driven Professional Selling","program":"PS","code":"PS I","type":"Pathways","codeName":"PS I: Relationship-Driven Professional Selling"},{"name":"Negotiation in Business and Sales","program":"PS","code":"PS II","type":"Pathways","codeName":"PS II: Negotiation in Business and Sales"},{"name":"Sales Leadership","program":"PS","code":"PS III","type":"Pathways","codeName":"PS III: Sales Leadership"},{"name":"Advanced Relationship-Driven Professional Selling","program":"PS","code":"PS IV","type":"Pathways","codeName":"PS IV: Advanced Relationship-Driven Professional Selling"},{"name":"Introduction to Psychology","program":"PSYCH","code":"PSYCH I","type":"Pillars","codeName":"PSYCH I: Introduction to Psychology"},{"name":"Developmental Psychology","program":"PSYCH","code":"PSYCH II","type":"Pillars","codeName":"PSYCH II: Developmental Psychology"},{"name":"Abnormal Psychology","program":"PSYCH","code":"PSYCH III","type":"Pillars","codeName":"PSYCH III: Abnormal Psychology"},{"name":"Biological/Physiological Psychology","program":"PSYCH","code":"PSYCH IV","type":"Pillars","codeName":"PSYCH IV: Biological/Physiological Psychology"},{"name":"Advanced Research","program":"PSYCH","code":"PSYCH IX","type":"Pillars","codeName":"PSYCH IX: Advanced Research"},{"name":"Cognitive Psychology","program":"PSYCH","code":"PSYCH V","type":"Pillars","codeName":"PSYCH V: Cognitive Psychology"},{"name":"Personality Psychology","program":"PSYCH","code":"PSYCH VI","type":"Pillars","codeName":"PSYCH VI: Personality Psychology"},{"name":"Social Psychology","program":"PSYCH","code":"PSYCH VII","type":"Pillars","codeName":"PSYCH VII: Social Psychology"},{"name":"Special Topics","program":"PSYCH","code":"PSYCH VIII","type":"Pillars","codeName":"PSYCH VIII: Special Topics"},{"name":"Practicum / Internship","program":"PSYCH","code":"PSYCH X","type":"Pillars","codeName":"PSYCH X: Practicum / Internship"},{"name":"Forecasting & Logistics","program":"SCM","code":"SCM I","type":"Pathways","codeName":"SCM I: Forecasting & Logistics"},{"name":"Sourcing & Operations","program":"SCM","code":"SCM II","type":"Pathways","codeName":"SCM II: Sourcing & Operations"},{"name":"Supply Chain Capstone","program":"SCM","code":"SCM III","type":"Pathways","codeName":"SCM III: Supply Chain Capstone"},{"name":"Supply Chain Management Technologies","program":"SCM","code":"SCM IV","type":"Pathways","codeName":"SCM IV: Supply Chain Management Technologies"},{"name":"Supply Chain in Action","program":"SCM","code":"SCM V","type":"Pathways","codeName":"SCM V: Supply Chain in Action"},{"name":"Strategic Public Relations","program":"SCP","code":"SCP I","type":"Pathways","codeName":"SCP I: Strategic Public Relations"},{"name":"Public Relations Tactics","program":"SCP","code":"SCP II","type":"Pathways","codeName":"SCP II: Public Relations Tactics"},{"name":"Crisis Communications","program":"SCP","code":"SCP III","type":"Pathways","codeName":"SCP III: Crisis Communications"},{"name":"Capstone","program":"SCP","code":"SCP IV","type":"Pathways","codeName":"SCP IV: Capstone"},{"name":"Introduction to Sociology","program":"SOCIO","code":"SOCIO I","type":"Pillars","codeName":"SOCIO I: Introduction to Sociology"},{"name":"Social Problems","program":"SOCIO","code":"SOCIO II","type":"Pillars","codeName":"SOCIO II: Social Problems"},{"name":"Statistics for Social Sciences","program":"SOCIO","code":"SOCIO III","type":"Pillars","codeName":"SOCIO III: Statistics for Social Sciences"},{"name":"Family & Intimate Relationships","program":"SOCIO","code":"SOCIO IV","type":"Pillars","codeName":"SOCIO IV: Family & Intimate Relationships"},{"name":"Research Methods for Social Sciences","program":"SOCIO","code":"SOCIO IX","type":"Pillars","codeName":"SOCIO IX: Research Methods for Social Sciences"},{"name":"Social Inequality & Stratification","program":"SOCIO","code":"SOCIO V","type":"Pillars","codeName":"SOCIO V: Social Inequality & Stratification"},{"name":"Applied Sociology, Social Work & Policy","program":"SOCIO","code":"SOCIO VI","type":"Pillars","codeName":"SOCIO VI: Applied Sociology, Social Work & Policy"},{"name":"Criminology","program":"SOCIO","code":"SOCIO VII","type":"Pillars","codeName":"SOCIO VII: Criminology"},{"name":"Race & Ethnicity","program":"SOCIO","code":"SOCIO VIII","type":"Pillars","codeName":"SOCIO VIII: Race & Ethnicity"},{"name":"Sociological Theory","program":"SOCIO","code":"SOCIO X","type":"Pillars","codeName":"SOCIO X: Sociological Theory"},{"name":"Sociology of Globalization","program":"SOCIO","code":"SOCIO XI","type":"Pillars","codeName":"SOCIO XI: Sociology of Globalization"},{"name":"Internship in Sociology","program":"SOCIO","code":"SOCIO XII","type":"Pillars","codeName":"SOCIO XII: Internship in Sociology"},{"name":"Senior Seminar / Capstone Research","program":"SOCIO","code":"SOCIO XIII","type":"Pillars","codeName":"SOCIO XIII: Senior Seminar / Capstone Research"},{"name":"Elementary Spanish I","program":"SPNSH","code":"SPNSH I","type":"Pillars","codeName":"SPNSH I: Elementary Spanish I"},{"name":"Elementary Spanish II","program":"SPNSH","code":"SPNSH II","type":"Pillars","codeName":"SPNSH II: Elementary Spanish II"},{"name":"Hispanic Civilizations I – Spain and the Americas","program":"SPNSH","code":"SPNSH III","type":"Pillars","codeName":"SPNSH III: Hispanic Civilizations I – Spain and the Americas"},{"name":"Intermediate Spanish I – Integrated Skills","program":"SPNSH","code":"SPNSH IV","type":"Pillars","codeName":"SPNSH IV: Intermediate Spanish I – Integrated Skills"},{"name":"Introduction to Hispanic Linguistics & Translation","program":"SPNSH","code":"SPNSH IX","type":"Pillars","codeName":"SPNSH IX: Introduction to Hispanic Linguistics & Translation"},{"name":"Intermediate Spanish II – Composition and Conversation","program":"SPNSH","code":"SPNSH V","type":"Pillars","codeName":"SPNSH V: Intermediate Spanish II – Composition and Conversation"},{"name":"Spanish for the Professions I – Business","program":"SPNSH","code":"SPNSH VI","type":"Pillars","codeName":"SPNSH VI: Spanish for the Professions I – Business"},{"name":"Spanish for the Professions II – Social Services, Criminal Justice & Health Professions","program":"SPNSH","code":"SPNSH VII","type":"Pillars","codeName":"SPNSH VII: Spanish for the Professions II – Social Services, Criminal Justice & Health Professions"},{"name":"Advanced Composition in Spanish","program":"SPNSH","code":"SPNSH VIII","type":"Pillars","codeName":"SPNSH VIII: Advanced Composition in Spanish"},{"name":"Oral Proficiency and Phonetics in Spanish","program":"SPNSH","code":"SPNSH X","type":"Pillars","codeName":"SPNSH X: Oral Proficiency and Phonetics in Spanish"},{"name":"Special Topics in Hispanic Studies","program":"SPNSH","code":"SPNSH XI","type":"Pillars","codeName":"SPNSH XI: Special Topics in Hispanic Studies"},{"name":"Survey of Hispanic Literature and Culture","program":"SPNSH","code":"SPNSH XII","type":"Pillars","codeName":"SPNSH XII: Survey of Hispanic Literature and Culture"},{"name":"Seminar on Contemporary Latin American Issues","program":"SPNSH","code":"SPNSH XIII","type":"Pillars","codeName":"SPNSH XIII: Seminar on Contemporary Latin American Issues"},{"name":"Senior Seminar in Spanish Studies","program":"SPNSH","code":"SPNSH XIV","type":"Pillars","codeName":"SPNSH XIV: Senior Seminar in Spanish Studies"},{"name":"Spanish Internship / Professional Practicum","program":"SPNSH","code":"SPNSH XV","type":"Pillars","codeName":"SPNSH XV: Spanish Internship / Professional Practicum"},{"name":"User Experience I","program":"WDM","code":"WDM I","type":"Pathways","codeName":"WDM I: User Experience I"},{"name":"User Experience II - Building Compelling User Experiences","program":"WDM","code":"WDM II","type":"Pathways","codeName":"WDM II: User Experience II - Building Compelling User Experiences"},{"name":"Goal-Oriented Web Design","program":"WDM","code":"WDM III","type":"Pathways","codeName":"WDM III: Goal-Oriented Web Design"}];
+const SEED = [];
+
+let instructors=[], placements={}, lastSync='', currentView='program';
+let sortF='score', sortD='desc';
+let filters={search:'',status:'',type:'',smin:null,smax:null,courses:[],program:'',published:'',pubYear:null,placedSections:''};
+let courseMatchAll=true; // true = must have ALL selected courses, false = ANY
+let selCourse=null, expanded=new Set();
+let nameColW=200;
+let uMode=null, pRows=[], pHdr=[], openSections=[];
+
+const c2p=Object.fromEntries(COURSES.map(c=>[c.code,c.program]));
+const c2n=Object.fromEntries(COURSES.map(c=>[c.code,c.name]));
+// MBA course code prefix → program label
+const MBA_PROG_MAP={
+  'AIMBA':'AI',
+  'CYMBA':'Cybersecurity',
+  'FIMBA':'Finance',
+  'BZMBA':'Business Analytics',
+  'HAMBA':'Healthcare',
+};
+function getMbaPrefix(code){ return Object.keys(MBA_PROG_MAP).find(p=>code.startsWith(p))||null; }
+
+// Maps full program names (from Typeform programPriority) → program codes
+const PROG_NAME_MAP={
+  'Applied Artificial Intelligence':['AAI'],
+  'Artificial Intelligence Literacy':['AIL'],
+  'Business Analytics':['BAM'],
+  'Cybersecurity':['CYBER'],
+  'Computer Science':['COMPS','CSC','CSM'],
+  'Data Science':['DSM','DAM'],
+  'Data Analytics':['DAM','DSM'],
+  'Digital Marketing':['DMARK'],
+  'Game Development':['GDM'],
+  'Healthcare Administration':['HADMN'],
+  'Health Administration':['HADMN'],
+  'Human Resources':['HRM'],
+  'Information Technology':['ITM'],
+  'Project Management':['PROJM'],
+  'Professional Sales':['PS'],
+  'Psychology':['PSYCH'],
+  'Sociology':['SOCIO'],
+  'History':['HISTY'],
+  'Biology':['BIOLG'],
+  'Natural Science':['NSM'],
+  'Mathematics':['MATHS'],
+  'Physics':['PHYSC'],
+  'Chemistry':['CHEMY'],
+  'Philosophy':['PHILO'],
+  'English':['ENGLH'],
+  'Spanish':['SPNSH'],
+  'Communications':['COMMS'],
+  'Finance':['FINAN'],
+  'Economics':['ECONM'],
+  'Nursing':['NDM'],
+  'Public Health':['PHM'],
+  'Business':['BUSNS'],
+};
+// Returns true if courseCode is among the instructor's top-N picks within its own type
+function isTopPriority(inst, courseCode, topN=1){
+  // MBA courses: check mbaProgramRanking independently
+  const pfx=getMbaPrefix(courseCode||'');
+  if(pfx){
+    const mp=inst.mbaProgramRanking||[];
+    return mp.slice(0,topN).includes(pfx);
+  }
+  // Pillars/Pathways: rank within that type only
+  const courseType=c2t[courseCode]||'';
+  const pp=inst.programPriority||[];
+  if(!pp.length) return false;
+  // Filter to same type first, then check rank within that subset
+  const typeEntries=courseType?pp.filter(p=>p.type===courseType):pp;
+  return typeEntries.slice(0,topN).some(p=>{
+    const codes=PROG_NAME_MAP[p.program]||[];
+    if(codes.includes(courseCode)) return true;
+    return p.program.toLowerCase().includes(courseCode.toLowerCase());
+  });
+}
+const c2t=Object.fromEntries(COURSES.map(c=>[c.code,c.type]));
+// Color palette for course pill grouping (10 distinct, accessible)
+const PILL_PAL=[
+  {bg:'#dbeafe',fg:'#1e40af'},{bg:'#d1fae5',fg:'#065f46'},{bg:'#ede9fe',fg:'#5b21b6'},
+  {bg:'#fef3c7',fg:'#92400e'},{bg:'#fee2e2',fg:'#991b1b'},{bg:'#fce7f3',fg:'#9d174d'},
+  {bg:'#e0f2fe',fg:'#0369a1'},{bg:'#fef9c3',fg:'#713f12'},{bg:'#ffedd5',fg:'#c2410c'},
+  {bg:'#f0fdf4',fg:'#15803d'}
+];
+function progPillStyle(prog){const h=prog.split('').reduce((a,c)=>((a<<5)-a+c.charCodeAt(0))|0,0);const p=PILL_PAL[Math.abs(h)%PILL_PAL.length];return `background:${p.bg};color:${p.fg};border:1px solid ${p.bg.replace(')',',0.4)').replace('rgb','rgba')}`;}
+function coursesByProg(codes){
+  const groups={};
+  codes.forEach(code=>{
+    const prog=c2p[code]||'Other';
+    if(!groups[prog])groups[prog]=[];
+    groups[prog].push(code);
+  });
+  return groups;
+}
+
+// Weighted score: 40% Initial Screen + 60% Detailed Interview
+function getScore(inst){
+  const i=parseFloat(inst.initialScore), d=parseFloat(inst.detailedScore);
+  const hi=inst.initialScore!=null&&inst.initialScore!=='';
+  const hd=inst.detailedScore!=null&&inst.detailedScore!=='';
+  if(hi&&hd) return +(i*0.4+d*0.6).toFixed(2);
+  if(hd) return +d;
+  if(hi) return +i;
+  // legacy: fall back to avgScore if individual scores not present
+  if(inst.avgScore!=null&&inst.avgScore!=='') return parseFloat(inst.avgScore);
+  return null;
+}
+function copyVal(text, el){
+  const flash=()=>{const orig=el.textContent;el.textContent='Copied!';el.style.color='var(--green)';setTimeout(()=>{el.textContent=orig;el.style.color='';},1200);};
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(flash);
+  } else {
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');flash();}catch(e){}document.body.removeChild(ta);
+  }
+}
+// Display version — shows decimals only when meaningful (4 → "4", 3.6 → "3.6", 3.60 → "3.60")
+function fmtScore(inst){
+  const s=getScore(inst);
+  if(s===null) return null;
+  const hi=inst.initialScore!=null&&inst.initialScore!=='';
+  const hd=inst.detailedScore!=null&&inst.detailedScore!=='';
+  if(hi&&hd){
+    // Weighted blend: show 2 decimals only if there's a fractional part
+    const fixed=s.toFixed(2);
+    // Drop trailing zeros after decimal: 4.00→4, 3.60→3.6... but keep both if non-zero
+    // e.g. 3.65 stays 3.65, 3.60 stays 3.60 (meaningful), 4.00 → 4
+    return parseFloat(fixed)===Math.floor(parseFloat(fixed)) ? String(Math.floor(parseFloat(fixed))) : fixed;
+  }
+  return String(s);
+}
+function sCls(s){if(s===null)return '';if(s>=4)return 'sh';if(s>=3.5)return 'sh';if(s>=3)return 'sm';return 'sl'}
+function sBadgeClass(s){
+  if(s===null) return 'sbadge-none';
+  if(s>=3.75) return 'sbadge-s4'; // strong green  (3.75–4.0)
+  if(s>=3.5)  return 'sbadge-s3'; // medium green  (3.5–3.74)
+  if(s>=3.25) return 'sbadge-s2'; // light green   (3.25–3.49)
+  return 'sbadge-s1';              // yellow        (3.0–3.24)
+}
+
+function filteredI(){
+  const s=filters.search.toLowerCase();
+  return instructors.filter(i=>{
+    if(s&&!i.name.toLowerCase().includes(s)&&!i.email.toLowerCase().includes(s)&&
+       !(i.courses||[]).join(' ').toLowerCase().includes(s)) return false;
+    if(filters.status&&i.status!==filters.status) return false;
+    if(filters.placedSections!==''){
+      const plc=(placements[i.email]||[]).length;
+      if(filters.placedSections==='4+'){if(plc<4) return false;}
+      else if(plc!==parseInt(filters.placedSections)) return false;
+    }
+    if(filters.courses&&filters.courses.length){
+      const ic=i.courses||[];
+      if(courseMatchAll){if(!filters.courses.every(c=>ic.includes(c))) return false;}
+      else{if(!filters.courses.some(c=>ic.includes(c))) return false;}
+    }
+    if(filters.program){
+      if(!(i.programs||[]).includes(filters.program)) return false;
+    }
+    if(filters.published){
+      const pub=(i.profile&&i.profile.published||'').toLowerCase();
+      if(filters.published==='yes'&&pub!=='yes') return false;
+      if(filters.published==='no'&&pub==='yes') return false;
+    }
+    if(filters.pubYear!==null){
+      const pub=(i.profile&&i.profile.published||'').toLowerCase();
+      if(pub!=='yes') return false;
+      const lp=i.profile&&i.profile.lastPublication;
+      if(!lp) return false;
+      const yr=new Date(lp).getFullYear();
+      if(yr<filters.pubYear) return false;
+    }
+    return true;
+  });
+}
+function filteredByC(code){return filteredI().filter(i=>(i.courses||[]).includes(code))}
+
+function switchView(v){
+  currentView=v;
+  document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['program','instructor','course','reco'][i]===v));
+  ['P','I','C','R'].forEach(n=>document.getElementById('v'+n).classList.toggle('hidden',{P:'program',I:'instructor',C:'course',R:'reco'}[n]!==v));
+  render();
+}
+function onSearch(){filters.search=document.getElementById('gs').value;render()}
+
+let cfActive=-1;
+function renderCourseFilter(){
+  // Render selected tags
+  const tags=document.getElementById('cfTags');
+  const cnt=document.getElementById('cfCount');
+  if(tags) tags.innerHTML=filters.courses.map(code=>{
+    const c=COURSES.find(x=>x.code===code);
+    return `<span style="display:inline-flex;align-items:center;gap:3px;background:var(--primary-light);color:var(--primary);border-radius:4px;padding:2px 6px;font-size:11px;font-weight:600">
+      ${code}<button onclick="toggleCourse('${code.replace(/'/g,"\\'")}',false)" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:13px;line-height:1;padding:0;margin-left:1px">×</button>
+    </span>`;
+  }).join('');
+  if(cnt) cnt.textContent=filters.courses.length?`${filters.courses.length} active`:'';
+}
+function showCfDropdown(){
+  const inp=document.getElementById('cfSearch');
+  const q=(inp.value||'').toLowerCase();
+  const drop=document.getElementById('cfDrop');
+  const matches=COURSES.filter(c=>!filters.courses.includes(c.code)&&(c.code.toLowerCase().includes(q)||c.name.toLowerCase().includes(q)));
+  if(!matches.length||!q){drop.style.display='none';return;}
+  // Position dropdown below input using fixed coords
+  const rect=inp.getBoundingClientRect();
+  drop.style.top=(rect.bottom+4)+'px';
+  drop.style.left=rect.left+'px';
+  drop.style.width=rect.width+'px';
+  cfActive=-1;
+  drop.innerHTML=matches.slice(0,12).map((c,i)=>`
+    <div class="cfdrop-item" data-code="${c.code}" onmousedown="toggleCourse('${c.code.replace(/'/g,"\\'")}',true);document.getElementById('cfSearch').value='';hideCfDropdown()"
+      style="padding:6px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid #f3f4f6">
+      <span style="font-weight:700;color:var(--primary)">${c.code}</span> ${c.name}
+    </div>`).join('')+(matches.length>12?`<div style="padding:4px 10px;font-size:10px;color:var(--muted)">${matches.length-12} more — keep typing</div>`:'');
+  drop.style.display='block';
+}
+function hideCfDropdown(){const d=document.getElementById('cfDrop');if(d)d.style.display='none';}
+function cfKeyNav(e){
+  const items=document.querySelectorAll('.cfdrop-item');
+  if(e.key==='ArrowDown'){cfActive=Math.min(cfActive+1,items.length-1);items.forEach((el,i)=>el.style.background=i===cfActive?'var(--primary-light)':'');}
+  else if(e.key==='ArrowUp'){cfActive=Math.max(cfActive-1,0);items.forEach((el,i)=>el.style.background=i===cfActive?'var(--primary-light)':'');}
+  else if(e.key==='Enter'&&cfActive>=0){items[cfActive].dispatchEvent(new MouseEvent('mousedown'));document.getElementById('cfSearch').value='';hideCfDropdown();}
+  else if(e.key==='Escape'){hideCfDropdown();}
+}
+function toggleCourse(code,add){
+  if(add){if(!filters.courses.includes(code))filters.courses.push(code);}
+  else{filters.courses=filters.courses.filter(c=>c!==code);}
+  renderCourseFilter();renderProgFilter();render();
+}
+function toggleCourseMatch(){
+  courseMatchAll=!courseMatchAll;
+  const btn=document.getElementById('cfMatchBtn');
+  if(btn){btn.textContent=courseMatchAll?'Match ALL':'Match ANY';btn.style.background=courseMatchAll?'var(--primary-light)':'var(--amber-light)';btn.style.color=courseMatchAll?'var(--primary)':'var(--amber)';btn.style.borderColor=courseMatchAll?'var(--primary)':'var(--amber)';}
+  render();
+}
+function applyF(){
+  filters.status=document.getElementById('fst').value;
+  filters.placedSections=document.getElementById('fplac').value;
+  filters.type=document.getElementById('fty').value;
+  filters.program=document.getElementById('fprog').value;
+  filters.published=document.getElementById('fpub').value;
+  const py=document.getElementById('fpuby').value;
+  filters.pubYear=py!==''?parseInt(py):null;
+  render();
+}
+function clearF(){
+  filters={search:'',status:'',type:'',smin:null,smax:null,courses:[],program:'',published:'',pubYear:null,placedSections:''};
+  renderCourseFilter();
+  ['gs','fpuby'].forEach(id=>document.getElementById(id).value='');
+  ['fst','fty','fprog','fpub','fplac'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cfSearch').value='';
+  courseMatchAll=true;const btn=document.getElementById('cfMatchBtn');if(btn){btn.textContent='Match ALL';btn.style.background='var(--primary-light)';btn.style.color='var(--primary)';btn.style.borderColor='var(--primary)';}
+  render();
+}
+function renderProgFilter(){
+  const sel=document.getElementById('fprog');
+  if(!sel) return;
+  const allProgs=[...new Set(COURSES.map(c=>c.program))].sort();
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All Programs</option>'+allProgs.map(p=>`<option value="${p}"${p===cur?' selected':''}>${p}</option>`).join('');
+}
+
+function render(){
+  // Compute name column width from widest name in full dataset
+  try{
+    const cv=document.createElement('canvas').getContext('2d');
+    cv.font='700 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    const nameW=Math.max(...instructors.map(i=>cv.measureText(i.name).width));
+    cv.font='400 10px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    const emailW=Math.max(...instructors.map(i=>cv.measureText(i.email).width));
+    nameColW=Math.max(160,Math.ceil(Math.max(nameW,emailW))+44);
+  }catch(e){}
+  updateQS();if(currentView==='program')rProgram();else if(currentView==='instructor')rInstructor();else if(currentView==='course')rCourse();else rReco()
+}
+
+function updateQS(){
+  const t=instructors.length, pl=Object.keys(placements).filter(e=>placements[e]&&placements[e].length>0).length;
+  const sc=instructors.filter(i=>getScore(i)!==null);
+  const avg=sc.length>0?(sc.reduce((a,b)=>a+(getScore(b)||0),0)/sc.length).toFixed(2):'—';
+  const openS=openSections.length;
+  document.getElementById('qs').innerHTML=`<span>${instructors.filter(i=>i.status==='Vetted').length}</span> vetted · <span>${pl}</span> placed${openS?` · <span>${openS}</span> open sections`:''}<br>Avg score: <span>${avg!=='—'?avg+'/4':'—'}</span>`;
+}
+
+// ── PROGRAM VIEW ────────────────────────────────────────────────────────────
+function rProgram(){
+  const el=document.getElementById('vP');
+  const fi=filteredI(), tf=filters.type;
+  const pm={};
+  COURSES.forEach(c=>{if(!tf||c.type===tf){if(!pm[c.program])pm[c.program]={type:c.type};} });
+  const progs=Object.keys(pm).sort((a,b)=>a.localeCompare(b)).filter(p=>!filters.program||p===filters.program);
+  let html=buildStats();
+  progs.forEach(prog=>{
+    const pInst=fi.filter(i=>(i.programs||[]).includes(prog));
+    if(!pInst.length&&fi.length>0) return;
+    const sorted=[...pInst].sort((a,b)=>{const ra=a.status==='Returning',rb=b.status==='Returning';if(ra&&!rb)return -1;if(rb&&!ra)return 1;const sa=getScore(a),sb=getScore(b);if(sb!==null&&sa!==null)return sb-sa;if(sb!==null)return 1;if(sa!==null)return -1;return a.name.localeCompare(b.name)});
+    html+=`<div class="program-block">
+      <div class="program-title" onclick="togP('${prog}')">
+        <span class="tog" id="pt-${prog}">▼</span>
+        <span>${prog}</span>
+        <span class="tbadge tbadge-${pm[prog].type||'Other'}">${pm[prog].type||''}</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">${pInst.length} candidate${pInst.length!==1?'s':''}</span>
+      </div>
+      <div id="pb-${prog}">${sorted.length?buildTable(sorted,{pCtx:prog}):'<p style="color:var(--muted);font-size:13px;padding:6px 0">No candidates.</p>'}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+function togP(p){const b=document.getElementById('pb-'+p),ic=document.getElementById('pt-'+p),h=b.style.display==='none';b.style.display=h?'':'none';ic.textContent=h?'▼':'▶'}
+
+// ── INSTRUCTOR VIEW ─────────────────────────────────────────────────────────
+function rInstructor(){
+  const el=document.getElementById('vI');
+  if(!instructors.length){el.innerHTML=emptyS('No instructors loaded','Upload CSVs using the buttons above.');return}
+  const fi=filteredI();
+  let sorted=[...fi].sort((a,b)=>{
+    let av,bv;
+    if(sortF==='score'){av=getScore(a);bv=getScore(b);}
+    else{av=a[sortF];bv=b[sortF];}
+    if(av===null||av===undefined)av=sortD==='desc'?-Infinity:Infinity;
+    if(bv===null||bv===undefined)bv=sortD==='desc'?-Infinity:Infinity;
+    if(typeof av==='string')av=av.toLowerCase();
+    if(typeof bv==='string')bv=bv.toLowerCase();
+    if(av<bv)return sortD==='asc'?-1:1;
+    if(av>bv)return sortD==='asc'?1:-1;
+    return 0;
+  });
+  const _pl=Object.keys(placements).filter(e=>placements[e]&&placements[e].length>0).length;
+  let html=buildStats();
+  html+=buildTable(sorted,{showProgPills:true,sortable:true});
+  el.innerHTML=html;
+}
+function setSort(f){if(sortF===f)sortD=sortD==='asc'?'desc':'asc';else{sortF=f;sortD='desc';}rInstructor()}
+function sarr(f){return sortF!==f?'↕':(sortD==='asc'?'↑':'↓')}
+
+// ── COURSE VIEW ─────────────────────────────────────────────────────────────
+function rCourse(){
+  const el=document.getElementById('vC'),tf=filters.type,pf=filters.program;
+  const grps={};
+  COURSES.forEach(c=>{if((!tf||c.type===tf)&&(!pf||c.program===pf)){if(!grps[c.program])grps[c.program]={type:c.type,courses:[]};grps[c.program].courses.push(c)}});
+  let lHtml='';
+  Object.keys(grps).sort().forEach(prog=>{
+    const visibleCourses=grps[prog].courses.sort((a,b)=>a.code.localeCompare(b.code)).filter(c=>!filters.courses.length||filters.courses.includes(c.code));
+    if(!visibleCourses.length) return;
+    lHtml+=`<div class="pghdr">${prog} <span style="font-weight:400;text-transform:none;font-size:9px">${grps[prog].type}</span></div>`;
+    visibleCourses.forEach(c=>{
+      const cnt=filteredByC(c.code).length;
+      lHtml+=`<div class="citem ${selCourse===c.code?'active':''}" onclick="selC('${c.code.replace(/'/g,"\'")}')">
+        <div class="cc">${c.code}</div><div class="cn">${c.name}</div>
+        ${cnt>0?`<div class="cnt">${cnt} candidate${cnt!==1?'s':''}</div>`:''}
+      </div>`;
+    });
+  });
+  let pH='';
+  if(!selCourse) pH=emptyS('Select a course','Choose a course from the left to see candidates.');
+  else{
+    const c=COURSES.find(x=>x.code===selCourse);
+    const cands=[...filteredByC(selCourse)].sort((a,b)=>{const ra=a.status==="Returning",rb=b.status==="Returning";if(ra&&!rb)return -1;if(rb&&!ra)return 1;const sa=getScore(a),sb=getScore(b);if(sb!==null&&sa!==null)return sb-sa;if(sb!==null)return 1;if(sa!==null)return -1;return a.name.localeCompare(b.name)});
+    pH=`<div style="margin-bottom:14px"><h2 style="font-size:17px;font-weight:700">${c.code}: ${c.name}</h2>
+      <span class="tbadge tbadge-${c.type||'Other'}" style="margin-top:4px;display:inline-block">${c.type}</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:8px">${cands.length} candidate${cands.length!==1?'s':''}</span></div>`;
+    pH+=cands.length?buildTable(cands,{cCtx:selCourse}):'<p style="color:var(--muted);font-size:13px">No candidates list this course.</p>';
+  }
+  el.innerHTML=`<div class="cside-wrap"><div class="cpanel">
+    <div style="padding:8px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px">Courses (${COURSES.filter(c=>(!tf||c.type===tf)&&(!pf||c.program===pf)).length})</div>
+    <div class="clist">${lHtml}</div></div>
+    <div style="flex:1;overflow-y:auto">${pH}</div></div>`;
+}
+function selC(code){selCourse=code;rCourse()}
+
+// ── TABLE ────────────────────────────────────────────────────────────────────
+function buildTable(list,opts={}){
+  if(!list.length) return '<p style="color:var(--muted);font-size:13px;padding:8px 0">No candidates found.</p>';
+  const{showProgPills,sortable,pCtx,cCtx}=opts;
+  // showProgPills (By Instructor): Name 26%, Programs-as-pills 32%, Score 14%, Status 14%, Sections 14%
+  // default (By Program / By Course): Name 26%, Courses 32%, Score 14%, Status 14%, Sections 14%
+  const cols=`<col style="width:26%"><col style="width:32%"><col style="width:14%"><col style="width:14%"><col style="width:14%">`;
+  let h=`<table style="table-layout:fixed;width:100%"><colgroup>${cols}</colgroup><thead><tr>`;
+  h+=`<th ${sortable?`onclick="setSort('name')"`:''}style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Name ${sortable?sarr('name'):''}</th>`;
+  h+=`<th>${showProgPills?'Programs':'Courses'}</th>`;
+  h+=`<th ${sortable?`onclick="setSort('score')"`:''}style="text-align:center">Score ${sortable?sarr('score'):''}</th>`;
+  h+='<th style="text-align:center">Status</th><th style="text-align:center">Sections</th></tr></thead><tbody>';
+  list.forEach((inst,idx)=>{
+    const s=getScore(inst), plac=placements[inst.email]||[], pCodes=plac.map(p=>p.courseCode);
+    const isX=expanded.has(inst.email);
+    h+=`<tr class="${isX?'xrow':''}" onclick="togD('${inst.email.replace(/'/g,"\'")}',event)" style="cursor:pointer">`;
+    const pBadgeHtml=inst.profile&&inst.profile.published&&inst.profile.published.toLowerCase()==='yes'?'<span class="pbadge" title="Published within last 5 years">P</span>':'';
+    h+=`<td style="white-space:nowrap"><div><strong>${inst.name}</strong>${pBadgeHtml}</div><div style="font-size:10px;color:var(--muted)">${inst.email}</div></td>`;
+    if(showProgPills){
+      // Show programs as colored pills (same palette as course pills)
+      const pp=inst.programPriority||[];
+      const ppMap=Object.fromEntries(pp.map((p,i)=>[p.program,i+1]));
+      const progsSorted=(inst.programs||[]).slice().sort((a,b)=>(ppMap[a]||99)-(ppMap[b]||99));
+      const more=progsSorted.length-4;
+      h+=`<td><div style="display:flex;flex-wrap:wrap;gap:2px">${progsSorted.slice(0,4).map(p=>{const ps=progPillStyle(p);return `<span style="${ps};border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;display:inline-block">${p}</span>`;}).join('')}${more>0?`<span style="font-size:10px;color:var(--muted);white-space:nowrap;align-self:center;margin-left:2px">+${more}</span>`:''}</div></td>`;
+    } else {
+      const crs=(inst.courses||[]).slice(0,3), more=(inst.courses||[]).length-3;
+      h+=`<td><div style="display:flex;flex-wrap:wrap;align-items:center;gap:1px">${crs.map(c=>{const prog=c2p[c]||'';const ps=progPillStyle(prog);const hl=c===cCtx?'cpill-hl':'';const placed=pCodes.includes(c)?'cpill-placed':'';return hl||placed?`<span class="cpill ${hl} ${placed}">${c}</span>`:`<span style="${ps};border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;margin:1px;display:inline-block">${c}</span>`;}).join('')}${more>0?`<span style="font-size:10px;color:var(--muted);white-space:nowrap;margin-left:2px">+${more}</span>`:''}</div></td>`;
+    }
+    const isRet=inst.status==='Returning';
+    h+=`<td style="text-align:center">${isRet?`<div class="sbadge sbadge-returning" style="margin:0 auto" title="Returning instructor">R</div>`:s!==null?`<div class="sbadge ${sBadgeClass(s)}" style="margin:0 auto">${fmtScore(inst)}</div>`:'<span class="sn">—</span>'}</td>`;
+    h+=`<td style="text-align:center"><span class="stbadge stbadge-${inst.status||'Other'}">${inst.status||'—'}</span></td>`;
+    h+=`<td style="text-align:center">${plac.length?`<span style="font-size:12px;font-weight:700;color:var(--primary)">${plac.length}</span>`:'<span style="color:var(--muted);font-size:11px">0</span>'}</td>`;
+    h+='</tr>';
+    if(isX) h+=`<tr><td colspan="5" style="padding:0">${buildDP(inst)}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  return h;
+}
+
+function buildDP(inst){
+  const s=getScore(inst), plac=placements[inst.email]||[];
+  const iScore=inst.initialScore!=null&&inst.initialScore!==''?parseFloat(inst.initialScore):null;
+  const dScore=inst.detailedScore!=null&&inst.detailedScore!==''?parseFloat(inst.detailedScore):null;
+  const eid=inst.email.replace(/[@.]/g,'_');
+  // Placement dropdown: use open sections if available, else all courses
+  const opts=openSections.length
+    ? (()=>{const seen=new Map();openSections.forEach(o=>{if(!seen.has(o.code))seen.set(o.code,o.course);});return [...seen.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([code,name])=>`<option value="${code}">${code}${name?' — '+name:''}</option>`).join('');})()
+    : COURSES.map(c=>`<option value="${c.code}">${c.code}: ${c.name}</option>`).join('');
+  const pH=plac.map((p,i)=>`<div class="pitem"><span class="pc">${p.courseCode}</span><span style="font-size:11px;color:var(--muted);margin:0 4px">–</span><span style="font-size:11px">${p.courseName}</span>${p.note?`<span class="pn">"${p.note}"</span>`:''}<button class="rm" onclick="rmPlac('${inst.email.replace(/'/g,"\'")}',${i});event.stopPropagation()">×</button></div>`).join('');
+  // Split profile into Education + Teaching Experience
+  const p=inst.profile||{};
+  const hasProfile=Object.values(p).some(v=>v);
+  const mkRow=(l,v)=>`<div class="df"><div class="dl">${l}</div><div class="dv">${v}</div></div>`;
+  const iWho=(inst.profile&&inst.profile.screenInterviewer)||'';
+  const dWho=(inst.profile&&inst.profile.detailedInterviewer)||'';
+  const mkSR=(lbl,sc,who)=>`<div class="df"><div class="dl">${lbl}</div><div class="dv" style="display:flex;align-items:center;gap:6px">${sc!==null?`<div class="sbadge ${sBadgeClass(sc)}">${sc}</div>${who?`<span style="font-size:11px;color:var(--muted)">by ${who}</span>`:''}` :'<span style="color:var(--muted);font-size:12px">—</span>'}</div></div>`;
+  const weightedRow=s!==null?`<div class="df"><div class="dl">Weighted Score</div><div class="dv"><div style="display:flex;align-items:center;gap:8px"><div class="sbadge ${sBadgeClass(s)}" style="font-size:13px;font-weight:900">${fmtScore(inst)}</div><span style="font-size:11px;color:var(--muted)">40% initial · 60% detailed</span></div></div></div>`:'';
+  const interviewHTML=mkSR('Initial Screen',iScore,iWho)+mkSR('Detailed Interview',dScore,dWho)+weightedRow;
+  const eduHTML=(()=>{
+    if(!hasProfile) return '<div style="color:var(--muted);font-size:11px">No education data yet</div>';
+    let h='';
+    if(p.highestDegree) h+=mkRow('Degree',p.highestDegree);
+    if(p.degreeField) h+=mkRow('Field',p.degreeField);
+    if(p.degreeInst) h+=mkRow('Institution',p.degreeInst);
+    if(p.degree2Field) h+=mkRow('2nd Degree',p.degree2Field);
+    if(p.degree2Inst) h+=mkRow('2nd Institution',p.degree2Inst);
+    return h||'<div style="color:var(--muted);font-size:11px">No education data yet</div>';
+  })();
+  const expHTML=(()=>{
+    if(!hasProfile) return '<div style="color:var(--muted);font-size:11px">No experience data yet</div>';
+    let h='';
+    if(p.onlineYears) h+=mkRow('Online Teaching',p.onlineYears+' yrs');
+    if(p.undergradYears) h+=mkRow('Undergrad Teaching',p.undergradYears+' yrs');
+    if(p.published){
+      const pub=p.published.toLowerCase()==='yes';
+      const date=p.lastPublication?new Date(p.lastPublication).getFullYear():'';
+      h+=mkRow('Published',pub?`<span style="color:var(--green);font-weight:700">Yes${date?' ('+date+')':''} <span class="pbadge">P</span></span>`:'<span style="color:var(--muted)">No</span>');
+    }
+    return h||'<div style="color:var(--muted);font-size:11px">No experience data yet</div>';
+  })();
+  // Program preferences split by type
+  const ppAll=inst.programPriority&&inst.programPriority.length?inst.programPriority:(inst.programs||[]).map(p=>({program:p,type:''}));
+  // MBA preferences come from mbaProgramRanking (derived from course order), not programPriority
+  const mbaItems=(inst.mbaProgramRanking||[]).map(pfx=>({program:MBA_PROG_MAP[pfx]||pfx,type:'MBA'}));
+  const ppByType=(type)=>{
+    const items=type==='MBA'?mbaItems:ppAll.filter(p=>p.type===type);
+    if(!items.length) return '<span style="color:var(--muted);font-size:11px">None</span>';
+    return items.map((p,i)=>{const cls=i===0?'ppbadge-1':i===1?'ppbadge-2':i===2?'ppbadge-3':'ppbadge-n';return `<div style="display:flex;align-items:flex-start;gap:6px;margin:4px 0"><span class="ppbadge ${cls}" style="flex-shrink:0;margin-top:1px">${i+1}</span><span style="font-size:12px;line-height:1.4">${p.program}</span></div>`;}).join('');
+  };
+  const ppSectionHTML=`
+    <div class="detail-lower">
+      <div class="ds"><h4>Pathways Preferences</h4>${ppByType('Pathways')}</div>
+      <div class="ds"><h4>Pillars Preferences</h4>${ppByType('Pillars')}</div>
+      <div class="ds"><h4>MBA Preferences</h4>${ppByType('MBA')}</div>
+    </div>`;
+  return `<div class="detail-panel">
+    <div class="ds">
+      <h4>Contact</h4>
+      <div class="df"><div class="dl">Name</div><div class="dv" style="font-weight:600">${inst.title?`<span style="margin-right:4px">${inst.title}</span>`:''}<span style="cursor:pointer" title="Click to copy" onclick="copyVal('${inst.name.replace(/'/g,"\\'")}',this);event.stopPropagation()">${inst.name}</span></div></div>
+      ${inst.preferredName?`<div class="df"><div class="dl">Preferred Name</div><div class="dv" style="cursor:pointer" title="Click to copy" onclick="copyVal('${inst.preferredName.replace(/'/g,"\\'")}',this);event.stopPropagation()">${inst.preferredName}</div></div>`:''}
+      <div class="df"><div class="dl">Email</div><div class="dv" style="font-size:11px;word-break:break-all;cursor:pointer" title="Click to copy" onclick="copyVal('${inst.email.replace(/'/g,"\\'")}',this);event.stopPropagation()">${inst.email}</div></div>
+      ${inst.profile&&inst.profile.lcmcEmail?`<div class="df"><div class="dl">LCMC Email</div><div class="dv" style="font-size:11px;word-break:break-all;cursor:pointer" title="Click to copy" onclick="copyVal('${inst.profile.lcmcEmail.replace(/'/g,"\\'")}',this);event.stopPropagation()">${inst.profile.lcmcEmail}</div></div>`:''}
+      <div class="df"><div class="dl">Status</div><div class="dv" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="stbadge stbadge-${inst.status||'Other'}">${inst.status||'—'}</span>
+        <select style="font-size:11px;padding:2px 4px;border:1px solid var(--border);border-radius:4px" onchange="chgSt('${inst.email.replace(/'/g,"\'")}',this.value);event.stopPropagation()">
+          ${['Returning','Vetted','Placed','Hired','Archived'].map(v=>`<option value="${v}" ${inst.status===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </div></div>
+      ${interviewHTML||'<div class="df"><div class="dl">Interview Scores</div><div class="dv"><span style="color:var(--muted);font-size:12px">No scores recorded</span></div></div>'}
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)"><button class="btn btn-sm" style="font-size:11px;color:#b91c1c;border-color:#fca5a5;background:#fee2e2" onclick="deleteInst('${inst.email.replace(/'/g,"\\'")}');event.stopPropagation()">🗑 Delete entry</button></div>
+    </div>
+    <div class="ds">
+      <h4>Education</h4>
+      ${eduHTML}
+    </div>
+    <div class="ds">
+      <h4>Teaching Experience</h4>
+      ${expHTML}
+    </div>
+  </div>
+  <div class="detail-courses">
+    <div class="section-hdr">Course Preferences (${(inst.courses||[]).length})</div>
+    ${(()=>{
+      const crs=inst.courses||[];
+      if(!crs.length) return '<span style="color:var(--muted);font-size:11px">None</span>';
+      const grps=coursesByProg(crs);
+      return Object.entries(grps).map(([prog,codes])=>{
+        const style=progPillStyle(prog);
+        return `<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px">${prog}</div><div>${codes.map(c=>`<span style="${style};border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;margin:2px 2px 2px 0;display:inline-block">${c}</span>`).join('')}</div></div>`;
+      }).join('');
+    })()}
+  </div>
+  ${ppSectionHTML}
+  <div class="detail-placements">
+    <div class="section-hdr">Placements${openSections.length?' <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:var(--muted)">(open sections only)</span>':''}</div>
+    <div id="plc-${eid}">${pH||'<p style="color:var(--muted);font-size:11px;margin-bottom:6px">No placements yet.</p>'}</div>
+    <div class="pform" onclick="event.stopPropagation()">
+      <select id="pc-${eid}" onclick="event.stopPropagation()"><option value="">Select course…</option>${opts}</select>
+      <input type="text" id="pn-${eid}" placeholder="Note (optional)" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter')addPlac('${inst.email.replace(/'/g,"\'")}')">
+      <button class="btn btn-sm btn-primary" onclick="addPlac('${inst.email.replace(/'/g,"\'")}');event.stopPropagation()">+ Place</button>
+    </div>
+  </div>`;
+}
+
+function togD(email,e){if(['BUTTON','SELECT','INPUT','OPTION'].includes(e.target.tagName))return;if(expanded.has(email))expanded.delete(email);else expanded.add(email);render()}
+
+// ── PLACEMENTS ───────────────────────────────────────────────────────────────
+function addPlac(email){
+  const eid=email.replace(/[@.]/g,'_'),sel=document.getElementById('pc-'+eid),ne=document.getElementById('pn-'+eid);
+  if(!sel||!sel.value)return;
+  const c=COURSES.find(x=>x.code===sel.value);
+  if(!placements[email])placements[email]=[];
+  placements[email].push({courseCode:sel.value,courseName:c?c.name:sel.value,note:ne?ne.value:'',placedAt:new Date().toISOString()});
+  const inst=instructors.find(i=>i.email===email);
+  if(inst)inst.status='Placed';
+  sel.value='';if(ne)ne.value='';
+  save();render();
+}
+function rmPlac(email,idx){
+  if(!placements[email])return;
+  placements[email].splice(idx,1);
+  const inst=instructors.find(i=>i.email===email);
+  if(inst&&!placements[email].length&&inst.status==='Placed')inst.status='Vetted';
+  save();render();
+}
+function chgSt(email,st){const inst=instructors.find(i=>i.email===email);if(inst)inst.status=st;save();render()}
+function deleteInst(email){
+  const inst=instructors.find(i=>i.email===email);
+  if(!inst) return;
+  if(!confirm(`Delete "${inst.name}" (${email})?\n\nThis removes them from the app permanently. It won't affect the source sheets.`)) return;
+  instructors=instructors.filter(i=>i.email!==email);
+  delete placements[email];
+  save();render();
+}
+
+// ── UPLOAD ────────────────────────────────────────────────────────────────────
+function openModal(mode){
+  uMode=mode;pRows=[];pHdr=[];
+  document.getElementById('uModal').classList.add('open');
+  const titles={ashby:'Upload Ashby CSV (Interview Scores)',typeform:'Upload Typeform CSV (Course Preferences)',staffing:'Upload Staffing CSV (Open Sections)',returning:'Upload Returning Instructors CSV (Notion Export)'};
+  const descs={
+    ashby:'Upload your Ashby custom list export. The importer auto-detects the "Average Overall Recommendation" column.',
+    typeform:'Upload your Typeform Google Sheet export. Course codes are auto-detected from all columns — no manual mapping needed.',
+    staffing:'Upload your staffing export. The app will find all Sourcing rows with no instructor and generate ranked recommendations.',
+    returning:'Export your Notion instructor database as CSV. Map name, email, and optionally a courses/programs column.'
+  };
+  document.getElementById('uTitle').textContent=titles[mode]||'Upload CSV';
+  document.getElementById('uDesc').textContent=descs[mode]||'';
+  ['cmSec','pvSec'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('impBtn').disabled=true;
+  document.getElementById('fi').value='';
+  document.getElementById('uLabel').textContent='Click to select CSV';
+}
+function closeModal(){document.getElementById('uModal').classList.remove('open')}
+function handleDrop(e){e.preventDefault();document.getElementById('uZone').classList.remove('dov');const f=e.dataTransfer.files[0];if(f)processF(f)}
+function handleFile(e){const f=e.target.files[0];if(f)processF(f)}
+
+function processF(file){
+  document.getElementById('uLabel').textContent=file.name;
+  const r=new FileReader();
+  r.onload=e=>{
+    const rows=parseCSV(e.target.result);
+    if(rows.length<2){alert('CSV appears empty.');return}
+    pHdr=rows[0];pRows=rows.slice(1);
+    if(uMode==='ashby')buildAshbyMap();
+    if(uMode==='returning')buildReturningMap();
+    document.getElementById('pvSec').classList.remove('hidden');
+    const pvMsg={ashby:`✓ ${pRows.length} rows detected. Map columns below.`,typeform:`✓ ${pRows.length} rows detected. Ready — courses will be auto-detected.`,staffing:`✓ ${pRows.length} rows detected. Open (Sourcing) sections will be extracted.`,returning:`✓ ${pRows.length} rows detected. Map columns below.`};
+    document.getElementById('pvText').textContent=pvMsg[uMode]||`✓ ${pRows.length} rows detected.`;
+    document.getElementById('impBtn').disabled=false;
+  };
+  r.readAsText(file);
+}
+
+function parseCSV(txt){
+  const rows=[];const lines=txt.split(/\r?\n/);
+  for(const line of lines){
+    if(!line.trim())continue;
+    const row=[];let inQ=false,cell='';
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'&&!inQ){inQ=true;continue}
+      if(ch==='"'&&inQ){if(line[i+1]==='"'){cell+='"';i++}else inQ=false;continue}
+      if(ch===','&&!inQ){row.push(cell.trim());cell='';continue}
+      cell+=ch;
+    }
+    row.push(cell.trim());rows.push(row);
+  }
+  return rows;
+}
+
+function buildAshbyMap(){
+  document.getElementById('cmSec').classList.remove('hidden');
+  const opts=['(skip)',...pHdr].map((h,i)=>`<option value="${i-1}">${h}</option>`).join('');
+  // Auto-detect average score column
+  const avgIdx=pHdr.findIndex(h=>h.toLowerCase().includes('average')||h.toLowerCase().includes('recommendation'));
+  const fields=[
+    {key:'name',label:'Candidate Name',guess:['name','candidate']},
+    {key:'email',label:'Email',guess:['email','mail']},
+    {key:'avgScore',label:'Avg Score (single column)',guess:['average','recommendation','score']},
+    {key:'initialScore',label:'Initial Score (if separate)',guess:['initial','first','score 1']},
+    {key:'detailedScore',label:'Detailed Score (if separate)',guess:['detailed','second','score 2']},
+    {key:'status',label:'Status',guess:['status','stage']},
+  ];
+  document.getElementById('cmRows').innerHTML=fields.map(f=>{
+    const gi=pHdr.findIndex(h=>f.guess.some(g=>h.toLowerCase().includes(g)));
+    return `<div class="cmrow"><label>${f.label}</label><select id="mp-${f.key}">${opts.replace(`value="${gi}"`,`value="${gi}" selected`)}</select></div>`;
+  }).join('');
+}
+
+const CREX=/([A-Z][A-Z0-9]+ [IVX]+(?:\d+)?(?:\.[0-9]+)?): /g;
+
+function doImport(){if(uMode==='ashby')doAshby();else if(uMode==='staffing')doStaffing();else if(uMode==='returning')doReturning();else doTypeform()}
+
+function buildReturningMap(){
+  document.getElementById('cmSec').classList.remove('hidden');
+  const fields=[
+    {key:'name',label:'Name',guess:['name','instructor','full name']},
+    {key:'email',label:'Email',guess:['email','mail']},
+    {key:'courses',label:'Courses (comma-separated codes)',guess:['course','courses','class']},
+    {key:'programs',label:'Programs (comma-separated)',guess:['program','programs']},
+    {key:'notes',label:'Notes (optional)',guess:['note','notes','comment']},
+  ];
+  document.getElementById('cmRows').innerHTML=fields.map(f=>{
+    const gi=pHdr.findIndex(h=>f.guess.some(g=>h.toLowerCase().includes(g)));
+    return `<div class="cm-row"><label>${f.label}</label><select id="rm-${f.key}"><option value="-1">— skip —</option>${pHdr.map((h,i)=>`<option value="${i}" ${i===gi?'selected':''}>${h}</option>`).join('')}</select></div>`;
+  }).join('');
+}
+
+function doReturning(){
+  const get=(row,key)=>{const el=document.getElementById('rm-'+key);const idx=el?parseInt(el.value):-1;return idx>=0?(row[idx]||'').trim():''};
+  let added=0,updated=0;
+  pRows.forEach(row=>{
+    const email=get(row,'email').toLowerCase();if(!email)return;
+    let inst=instructors.find(i=>i.email===email);
+    if(!inst){inst={name:'',email,courses:[],programs:[],initialScore:'',detailedScore:'',avgScore:'',status:'Returning',lastUpdated:''};instructors.push(inst);added++;}else{updated++;}
+    if(get(row,'name'))inst.name=get(row,'name');
+    inst.status='Returning';
+    // Parse course codes
+    const rawCourses=get(row,'courses');
+    if(rawCourses){
+      const codes=rawCourses.split(/[,;]+/).map(s=>s.trim().toUpperCase()).filter(s=>s&&c2p[s]);
+      inst.courses=[...new Set([...(inst.courses||[]),...codes])];
+      inst.programs=[...new Set(inst.courses.map(c=>c2p[c]).filter(Boolean))];
+    }
+    // Parse programs directly if provided
+    const rawProgs=get(row,'programs');
+    if(rawProgs){
+      const progs=rawProgs.split(/[,;]+/).map(s=>s.trim()).filter(Boolean);
+      inst.programs=[...new Set([...(inst.programs||[]),...progs])];
+    }
+    const prof=inst.profile||{};
+    if(get(row,'notes'))prof.returningNotes=get(row,'notes');
+    inst.profile=prof;
+    inst.lastUpdated=new Date().toLocaleString();
+  });
+  finish('Returning Instructors',added,updated);
+}
+
+function doAshby(){
+  const get=(row,key)=>{const el=document.getElementById('mp-'+key);const idx=el?parseInt(el.value):-1;return idx>=0?(row[idx]||'').trim():''};
+  let added=0,updated=0;
+  pRows.forEach(row=>{
+    const email=get(row,'email').toLowerCase();if(!email)return;
+    let inst=instructors.find(i=>i.email===email);
+    // Fallback: name match
+    if(!inst){
+      const aname=get(row,'name').toLowerCase();
+      const apart=aname.split();
+      if(apart.length>=2){
+        inst=instructors.find(i=>{const tp=i.name.toLowerCase().split();return tp.length>=2&&tp[tp.length-1]===apart[apart.length-1]&&tp[0].slice(0,3)===apart[0].slice(0,3)});
+      }
+    }
+    if(!inst){inst={name:get(row,'name'),email,courses:[],programs:[],avgScore:'',initialScore:'',detailedScore:'',status:'Vetted',lastUpdated:''};instructors.push(inst);added++}else updated++;
+    if(get(row,'name'))inst.name=get(row,'name');
+    if(get(row,'avgScore')!=='')inst.avgScore=get(row,'avgScore');
+    if(get(row,'initialScore')!=='')inst.initialScore=get(row,'initialScore');
+    if(get(row,'detailedScore')!=='')inst.detailedScore=get(row,'detailedScore');
+    if(get(row,'status')!=='')inst.status=get(row,'status');
+    // Capture profile fields from any extra columns
+    const profileMap={onlineYears:'online',undergradYears:'undergraduate',highestDegree:'highest degree',degreeField:'field is your highest',degreeInst:'institution did you earn your highest',degree2Field:'field is your second',degree2Inst:'institution did you earn your second',published:'have you published',lastPublication:'most recent peer'};
+    const prof=inst.profile||{};
+    pHdr.forEach((h,i)=>{const hl=h.toLowerCase();for(const[key,kw]of Object.entries(profileMap)){if(hl.includes(kw)&&(row[i]||'').trim()&&(row[i]||'').trim()!=='-'){prof[key]=(row[i]||'').trim();}}});
+    inst.profile=prof;
+    inst.lastUpdated=new Date().toLocaleString();
+  });
+  finish('Ashby',added,updated);
+}
+
+function doAshbyDirect(rows){
+  const hdr=rows[0].map(h=>h.toLowerCase());
+  const ci=(kw)=>hdr.findIndex(h=>h.includes(kw));
+  const iName=ci('name'), iEmail=ci('email'), iMergeEmail=ci('merge email');
+  const iScreen=ci('initial screen score'), iScreenWho=ci('initial screen interviewer');
+  const iDetailed=ci('detailed interview score'), iDetailedWho=ci('detailed interview interviewer');
+  const iDegree=ci('highest degree'), iDegreeField=ci('degree field'), iDegreeInst=ci('degree institution');
+  const iDeg2Field=ci('2nd degree field'), iDeg2Inst=ci('2nd degree institution');
+  const iOnline=ci('online teaching years'), iUndergrad=ci('undergrad teaching years');
+  const iPublished=ci('published'), iLastPub=ci('last publication');
+  let added=0,updated=0;
+  rows.slice(1).forEach(row=>{
+    const ashbyEmail=(row[iEmail]||'').trim().toLowerCase();if(!ashbyEmail)return;
+    // If a Merge Email is set, use it as the canonical key (matches the Typeform record)
+    const mergeEmail=iMergeEmail>=0?(row[iMergeEmail]||'').trim().toLowerCase():'';
+    const email=mergeEmail||ashbyEmail;
+    let inst=instructors.find(i=>i.email===email);
+    const isNew=!inst;
+    if(isNew){inst={name:'',email,courses:[],programs:[],avgScore:'',initialScore:'',detailedScore:'',status:'Vetted',lastUpdated:''};instructors.push(inst);added++;}
+    const snap=isNew?null:JSON.stringify({n:inst.name,s1:inst.initialScore,s2:inst.detailedScore,p:inst.profile});
+    if(iName>=0&&row[iName])inst.name=row[iName].trim();
+    if(iScreen>=0&&row[iScreen])inst.initialScore=row[iScreen].trim();
+    if(iDetailed>=0&&row[iDetailed])inst.detailedScore=row[iDetailed].trim();
+    const prof=inst.profile||{};
+    if(iScreenWho>=0&&row[iScreenWho])prof.screenInterviewer=row[iScreenWho].trim();
+    if(iDetailedWho>=0&&row[iDetailedWho])prof.detailedInterviewer=row[iDetailedWho].trim();
+    if(iDegree>=0&&row[iDegree])prof.highestDegree=row[iDegree].trim();
+    if(iDegreeField>=0&&row[iDegreeField])prof.degreeField=row[iDegreeField].trim();
+    if(iDegreeInst>=0&&row[iDegreeInst])prof.degreeInst=row[iDegreeInst].trim();
+    if(iDeg2Field>=0&&row[iDeg2Field])prof.degree2Field=row[iDeg2Field].trim();
+    if(iDeg2Inst>=0&&row[iDeg2Inst])prof.degree2Inst=row[iDeg2Inst].trim();
+    if(iOnline>=0&&row[iOnline])prof.onlineYears=row[iOnline].trim();
+    if(iUndergrad>=0&&row[iUndergrad])prof.undergradYears=row[iUndergrad].trim();
+    if(iPublished>=0&&row[iPublished])prof.published=row[iPublished].trim();
+    if(iLastPub>=0&&row[iLastPub])prof.lastPublication=row[iLastPub].trim();
+    inst.profile=prof;
+    if(!isNew&&JSON.stringify({n:inst.name,s1:inst.initialScore,s2:inst.detailedScore,p:inst.profile})!==snap) updated++;
+    inst.lastUpdated=new Date().toLocaleString();
+  });
+  finish('Ashby (Sheets)',added,updated);
+}
+
+async function syncFromSheets(silent=false){
+  const SHEET_ID='1L7n8KNkt5NVvMeVvzKKbT02vJKdjE1rhimlTKmswooI';
+  const API_KEY='AIzaSyAC7JR_Ho52B97-8pH5hV8RBeveY2JmSh4';
+  const TAB_TF=encodeURIComponent("Instructor Course Preference Form_AY '26 - '27");
+  const TAB_AB=encodeURIComponent("Ashby");
+  const TAB_RT=encodeURIComponent("Returning");
+  const btn=document.getElementById('syncSheetsBtn');
+  if(btn){btn.textContent='⏳ Syncing…';btn.disabled=true;}
+  try{
+    // Sync Typeform tab
+    const r1=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB_TF}?key=${API_KEY}`);
+    if(!r1.ok)throw new Error(`Typeform tab: HTTP ${r1.status}`);
+    const d1=await r1.json();
+    const rows1=d1.values||[];
+    if(rows1.length>=2){pHdr=rows1[0];pRows=rows1.slice(1);doTypeform();}
+    // Sync Ashby tab
+    const r2=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB_AB}?key=${API_KEY}`);
+    if(r2.ok){
+      const d2=await r2.json();
+      const rows2=d2.values||[];
+      if(rows2.length>=2) doAshbyDirect(rows2);
+    }
+    // Sync Returning tab (optional)
+    const r3=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB_RT}?key=${API_KEY}`);
+    if(r3.ok){
+      const d3=await r3.json();
+      const rows3=d3.values||[];
+      if(rows3.length>=2) doReturningDirect(rows3);
+    }
+    // Sync Staffing tab (optional)
+    const TAB_ST=encodeURIComponent("Staffing");
+    const r4=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB_ST}?key=${API_KEY}`);
+    if(r4.ok){
+      const d4=await r4.json();
+      const rows4=d4.values||[];
+      if(rows4.length>=2) doStaffingDirect(rows4);
+    }
+  }catch(err){if(!silent)alert('Sync failed: '+err.message);}
+  finally{if(btn){btn.textContent='☁ Sync from Sheets';btn.disabled=false;}}
+}
+
+function doReturningDirect(rows){
+  const hdr=rows[0].map(h=>h.toLowerCase());
+  const ci=(kw)=>hdr.findIndex(h=>h.includes(kw));
+  const iName=ci('name');
+  // "Personal Email" must match before generic "email" would hit "Institutional Email"
+  const iEmail=hdr.findIndex(h=>h.includes('personal email'));
+  // "Institutional Email" = LCMC email
+  const iLcmc=hdr.findIndex(h=>h.includes('institutional email'));
+  const iDegree=ci('highest degree'), iDegreeField=ci('degree field');
+  const iCourses=ci('course'), iPrograms=ci('program'), iNotes=ci('note');
+  let added=0,updated=0;
+  rows.slice(1).forEach(row=>{
+    const email=(iEmail>=0?row[iEmail]:'').trim().toLowerCase();if(!email)return;
+    const lcmcEmail=(iLcmc>=0?row[iLcmc]:'').trim().toLowerCase();
+    let inst=instructors.find(i=>i.email===email);
+    if(!inst&&lcmcEmail){
+      // Check for a duplicate entry where the lcmc email was used as the primary key
+      const lcmcInst=instructors.find(i=>i.email===lcmcEmail);
+      if(lcmcInst){
+        // Merge: promote personal email to canonical; move placements
+        lcmcInst.email=email;
+        if(placements[lcmcEmail]){placements[email]=placements[lcmcEmail];delete placements[lcmcEmail];}
+        inst=lcmcInst;
+      }
+    }
+    if(!inst){inst={name:'',email,courses:[],programs:[],initialScore:'',detailedScore:'',avgScore:'',status:'Returning',lastUpdated:''};instructors.push(inst);added++;}else{updated++;}
+    if(iName>=0&&row[iName])inst.name=row[iName].trim();
+    inst.status='Returning';
+    if(iCourses>=0&&row[iCourses]){
+      const codes=(row[iCourses]||'').split(/[,;]+/).map(s=>s.trim().toUpperCase()).filter(s=>s&&c2p[s]);
+      inst.courses=[...new Set([...(inst.courses||[]),...codes])];
+      inst.programs=[...new Set(inst.courses.map(c=>c2p[c]).filter(Boolean))];
+    }
+    if(iPrograms>=0&&row[iPrograms]){
+      const progs=(row[iPrograms]||'').split(/[,;]+/).map(s=>s.trim()).filter(Boolean);
+      inst.programs=[...new Set([...(inst.programs||[]),...progs])];
+    }
+    const prof=inst.profile||{};
+    if(iNotes>=0&&row[iNotes])prof.returningNotes=row[iNotes].trim();
+    if(iLcmc>=0&&row[iLcmc])prof.lcmcEmail=row[iLcmc].trim().toLowerCase();
+    if(iDegree>=0&&row[iDegree])prof.highestDegree=row[iDegree].trim();
+    if(iDegreeField>=0&&row[iDegreeField])prof.degreeField=row[iDegreeField].trim();
+    inst.profile=prof;
+    inst.lastUpdated=new Date().toLocaleString();
+  });
+  finish('Returning (Sheets)',added,updated);
+}
+
+function doTypeform(){
+  let added=0,updated=0;
+  pRows.forEach(row=>{
+    if(row.length<5)return;
+    const pref=(row[2]||row[1]||'').trim(), last=(row[3]||'').trim();
+    const email=(row[4]||'').trim().toLowerCase();
+    if(!email)return;
+    let inst=instructors.find(i=>i.email===email);
+    const isNewTF=!inst;
+    if(isNewTF){inst={name:'',email,courses:[],programs:[],avgScore:'',initialScore:'',detailedScore:'',status:'Vetted',lastUpdated:''};instructors.push(inst);added++;}
+    const snapTF=isNewTF?null:JSON.stringify({n:inst.name,c:inst.courses,pp:inst.programPriority,mr:inst.mbaCourseRanking});
+    if(pref||last)inst.name=`${pref} ${last}`.trim();
+    if(pref) inst.preferredName=pref;
+    inst.title=(row[0]||'').trim();
+    const seen=new Set(),codes=[];
+    row.forEach(cell=>{if(!cell)return;for(const m of cell.matchAll(/([A-Za-z][A-Za-z0-9]+ (?:[IVX]+\d*|\d+)): /g)){const cd=m[1];if(!seen.has(cd)&&c2p[cd]){seen.add(cd);codes.push(cd)}}});
+    inst.courses=[...new Set([...(inst.courses||[]),...codes])];
+    inst.programs=[...new Set(inst.courses.map(c=>c2p[c]).filter(Boolean))];
+    // Capture program priority from column headers — always re-parse so Pillars/Pathways stay fresh
+    if(pHdr.length){
+      const pp=[];
+      const hIdx=(kw)=>pHdr.findIndex(h=>h.toLowerCase().includes(kw));
+      const primPW=hIdx('primarily interested in teaching for');
+      const addPW1=pHdr.findIndex((h,i)=>h.toLowerCase().includes('additional') && h.toLowerCase().includes('program') && !h.toLowerCase().includes('(s)') && i>primPW);
+      const addPW2=pHdr.findIndex((h,i)=>h.toLowerCase().includes('additional') && h.toLowerCase().includes('program') && !h.toLowerCase().includes('(s)') && i>addPW1 && i>primPW);
+      const otherPW=pHdr.findIndex(h=>h.toLowerCase().includes('additional') && h.toLowerCase().includes('program(s)'));
+      const primPL=pHdr.findIndex((h,i)=>h.toLowerCase().includes('primarily') && h.toLowerCase().includes('pillars') && i>primPW);
+      const addPL=pHdr.findIndex((h,i)=>h.toLowerCase().includes('additional') && h.toLowerCase().includes('pillars') && !h.toLowerCase().includes('(s)') && i>primPL);
+      const otherPL=pHdr.findIndex(h=>h.toLowerCase().includes('additional') && h.toLowerCase().includes('pillars') && h.toLowerCase().includes('(s)'));
+      [[primPW,'Pathways'],[addPW1,'Pathways'],[addPW2,'Pathways']].forEach(([idx,type])=>{
+        const v=(row[idx]||'').trim();
+        if(v&&v!=='TRUE'&&v!=='FALSE') pp.push({program:v,type});
+      });
+      const oth=(row[otherPW]||'').trim();
+      if(oth&&oth!=='TRUE'&&oth!=='FALSE') oth.split(',').forEach(p=>{p=p.trim();if(p)pp.push({program:p,type:'Pathways'})});
+      [[primPL,'Pillars'],[addPL,'Pillars']].forEach(([idx,type])=>{
+        const v=(row[idx]||'').trim();
+        if(v&&v!=='TRUE'&&v!=='FALSE') pp.push({program:v,type});
+      });
+      const othP=(row[otherPL]||'').trim();
+      if(othP&&othP!=='TRUE'&&othP!=='FALSE') othP.split(',').forEach(p=>{p=p.trim();if(p)pp.push({program:p,type:'Pillars'})});
+      if(pp.length) inst.programPriority=pp;
+    }
+    // MBA course ranking — "Which MBA course(s) would you want to be considered for?"
+    if(pHdr.length){
+      const mbaColIdx=pHdr.findIndex(h=>h.toLowerCase().includes('mba')&&h.toLowerCase().includes('course'));
+      if(mbaColIdx>=0&&row[mbaColIdx]){
+        const ranking=(row[mbaColIdx]||'').split(',').map(s=>{
+          const m=s.trim().match(/^([A-Z][A-Z0-9]*(?:\s+[IVX]+|\s+\d+)?)\s*:/);
+          return m?m[1].trim():null;
+        }).filter(Boolean);
+        if(ranking.length){
+          inst.mbaCourseRanking=ranking;
+          // Derive program ranking from order prefixes first appear
+          const seenPfx=[];
+          ranking.forEach(code=>{const pfx=getMbaPrefix(code);if(pfx&&!seenPfx.includes(pfx))seenPfx.push(pfx);});
+          inst.mbaProgramRanking=seenPfx;
+        }
+      }
+    }
+    if(!isNewTF&&JSON.stringify({n:inst.name,c:inst.courses,pp:inst.programPriority,mr:inst.mbaCourseRanking})!==snapTF) updated++;
+    inst.lastUpdated=new Date().toLocaleString();
+  });
+  finish('Typeform',added,updated);
+}
+
+function doStaffing(){
+  // Parse staffing CSV: columns Code, Course, Institution, Instructor, Status, Program, Type
+  const hi=pHdr.map(h=>h.toLowerCase());
+  const ci=(names)=>names.map(n=>hi.findIndex(h=>h.includes(n))).find(i=>i>=0)??-1;
+  const codeI=ci(['code']),courseI=ci(['course']),instI=ci(['instructor']),statusI=ci(['status']),progI=ci(['program']),typeI=ci(['type']);
+  openSections=[];
+  pRows.forEach(row=>{
+    const instructor=(instI>=0?row[instI]:'').trim();
+    const status=(statusI>=0?row[statusI]:'').trim().toLowerCase();
+    if(instructor||status==='confirmed') return; // skip filled or confirmed
+    const rawCode=(codeI>=0?row[codeI]:'').trim();
+    // Strip section number: "AAI I - 1" → "AAI I"
+    const code=rawCode.replace(/\s*-\s*\d+$/, '').trim();
+    if(!code) return;
+    openSections.push({
+      rawCode, code,
+      course:(courseI>=0?row[courseI]:'').trim(),
+      program:(progI>=0?row[progI]:'').trim(),
+      type:(typeI>=0?row[typeI]:'').trim(),
+    });
+  });
+  lastSync=new Date().toLocaleString();updateLastSync();closeModal();switchView('reco');
+  alert(`Found ${openSections.length} open sections. Recommendations generated.`);
+}
+
+function doStaffingDirect(rows){
+  const hi=rows[0].map(h=>h.toLowerCase());
+  const ci=(names)=>names.map(n=>hi.findIndex(h=>h.includes(n))).find(i=>i>=0)??-1;
+  const codeI=ci(['code']),courseI=ci(['course']),instI=ci(['instructor']),statusI=ci(['status']);
+  const progI=ci(['program']),typeI=ci(['type']);
+  const lcmcI=ci(['institutional email']);
+  const persEmailI=ci(['personal email']);
+
+  openSections=[];
+  const newPlacements={};
+
+  rows.slice(1).forEach(row=>{
+    const instructor=(instI>=0?row[instI]:'').trim();
+    const status=(statusI>=0?row[statusI]:'').trim().toLowerCase();
+    const rawCode=(codeI>=0?row[codeI]:'').trim();
+    const code=rawCode.replace(/\s*-\s*\d+$/, '').trim();
+    if(!code) return;
+
+    // Open section — no instructor assigned
+    if(!instructor){
+      openSections.push({
+        rawCode, code,
+        course:(courseI>=0?row[courseI]:'').trim(),
+        program:(progI>=0?row[progI]:'').trim(),
+        type:(typeI>=0?row[typeI]:'').trim(),
+      });
+      return;
+    }
+
+    // Any section with an instructor listed counts as staffed
+    if(instructor){
+      const lcmc=(lcmcI>=0?row[lcmcI]:'').trim().toLowerCase();
+      const persEmail=(persEmailI>=0?row[persEmailI]:'').trim().toLowerCase();
+      let inst=null;
+      // 1. LCMC email (most reliable for returning instructors)
+      if(lcmc) inst=instructors.find(i=>i.profile&&i.profile.lcmcEmail&&i.profile.lcmcEmail.toLowerCase()===lcmc);
+      // 2. Personal email
+      if(!inst&&persEmail) inst=instructors.find(i=>i.email.toLowerCase()===persEmail);
+      // 3. Exact full name match
+      if(!inst) inst=instructors.find(i=>i.name.toLowerCase()===instructor.toLowerCase());
+      // 4. Last name + full first name (no fuzzy initials — avoids false matches)
+      if(!inst){
+        const parts=instructor.toLowerCase().split(/\s+/);
+        if(parts.length>=2){
+          const first=parts[0], last=parts[parts.length-1];
+          inst=instructors.find(i=>{
+            const ip=i.name.toLowerCase().split(/\s+/);
+            return ip.length>=2&&ip[ip.length-1]===last&&ip[0]===first;
+          });
+        }
+      }
+      if(!inst) return;
+
+      if(!newPlacements[inst.email]) newPlacements[inst.email]=[];
+      const c=COURSES.find(x=>x.code===code);
+      const sectionLabel=rawCode!==code?'Section '+rawCode.replace(code,'').replace(/\s*-\s*/,'').trim():'';
+      newPlacements[inst.email].push({
+        courseCode:code,
+        courseName:c?c.name:(courseI>=0?row[courseI]:'').trim()||code,
+        note:sectionLabel,
+        placedAt:new Date().toISOString()
+      });
+    }
+  });
+
+  // Staffing sheet is source of truth: clear all existing placements + Placed status first,
+  // then rebuild only from confirmed rows in the sheet.
+  instructors.forEach(i=>{
+    if(i.status==='Placed') i.status='Vetted';
+  });
+  placements={};
+  Object.entries(newPlacements).forEach(([email,placs])=>{
+    placements[email]=placs;
+    const inst=instructors.find(i=>i.email===email);
+    if(inst&&inst.status!=='Returning') inst.status='Placed';
+  });
+
+  save();
+  lastSync=new Date().toLocaleString();updateLastSync();
+}
+
+// ── RECOMMENDATIONS ─────────────────────────────────────────────────────────
+function rReco(){
+  const el=document.getElementById('vR');
+  if(!openSections.length){
+    el.innerHTML=`<div class="empty"><div class="icon">✨</div><strong>No open sections loaded</strong><p>Add your staffing export to the <strong>Staffing</strong> tab in the Google Sheet, then hit <strong>Sync from Sheets</strong>. Or use the Staffing upload button for a one-off import.</p></div>`;
+    return;
+  }
+  // Group open sections by course code, respecting sidebar type filter
+  const tf=filters.type;
+  const byCode={};
+  openSections.filter(s=>!tf||s.type.toLowerCase()===tf.toLowerCase()).forEach(s=>{
+    if(!byCode[s.code]) byCode[s.code]={...s,count:0};
+    byCode[s.code].count++;
+  });
+  // Sort courses: most open sections first
+  const sortedCodes=Object.keys(byCode).sort((a,b)=>a.localeCompare(b));
+  const totalOpen=openSections.length;
+  const scoredAvail=instructors.filter(i=>i.status!=='Archived'&&getScore(i)!==null&&(placements[i.email]||[]).length<3);
+  const priChecked=document.getElementById('recoPriF')&&document.getElementById('recoPriF').checked;
+  const hideStaffed=document.getElementById('recoHideStaffed')&&document.getElementById('recoHideStaffed').checked;
+  const onlyNoCandidates=document.getElementById('recoNoCandidates')&&document.getElementById('recoNoCandidates').checked;
+  let html=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input type="checkbox" id="recoHideStaffed" onchange="rReco()" ${hideStaffed?'checked':''}> Hide fully staffed</label>
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input type="checkbox" id="recoNoCandidates" onchange="rReco()" ${onlyNoCandidates?'checked':''}> Only show courses with no candidates</label>
+    <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input type="checkbox" id="recoPriF" onchange="rReco()" ${priChecked?'checked':''}> Only instructor's #1 program choice</label>
+  </div>`;
+  html+=buildStats();
+  html+=`<p style="font-size:12px;color:var(--muted);margin-bottom:16px">Ranked by interview score. Candidates already placed in 3+ sections are de-prioritized. Click <strong>Place</strong> to assign.</p>`;
+  sortedCodes.filter(code=>{
+    const alreadyPlaced=instructors.filter(i=>(placements[i.email]||[]).some(p=>p.courseCode===code)).length;
+    if(hideStaffed&&alreadyPlaced>=byCode[code].count) return false;
+    if(onlyNoCandidates){
+      const hasCandidates=instructors.some(i=>i.status!=='Archived'&&(i.courses||[]).includes(code)&&(!priChecked||isTopPriority(i,c2p[code],1)));
+      if(hasCandidates) return false;
+    }
+    return true;
+  }).forEach(code=>{
+    const sec=byCode[code];
+    // Find candidates who list this course and aren't archived
+    const candidates=instructors
+      .filter(i=>i.status!=='Archived'&&(i.courses||[]).includes(code)&&(!priChecked||isTopPriority(i,c2p[code],1)))
+      .sort((a,b)=>{
+        const ra=a.status==='Returning', rb=b.status==='Returning';
+        if(ra&&!rb)return -1; if(rb&&!ra)return 1;
+        const sa=getScore(a)??-1, sb=getScore(b)??-1;
+        const pa=(placements[a.email]||[]).length, pb=(placements[b.email]||[]).length;
+        // Penalize if already at 3+ sections
+        const penA=pa>=3?-0.5:0, penB=pb>=3?-0.5:0;
+        return (sb+penB)-(sa+penA);
+      });
+    const avail=candidates;
+    const alreadyPlaced=instructors.filter(i=>(placements[i.email]||[]).some(p=>p.courseCode===code)).length;
+    html+=`<div class="reco-block">
+      <div class="reco-hdr">
+        <div><div class="rc">${code}: ${sec.course||c2n[code]||''}</div>
+        <div class="ri">${sec.program} · ${sec.type} · <strong>${sec.count}</strong> open section${sec.count!==1?'s':''}</div></div>
+        ${alreadyPlaced?`<span style="margin-left:auto;font-size:11px;color:var(--green)">✓ ${alreadyPlaced} already placed</span>`:''}
+      </div>`;
+    if(!avail.length){
+      html+=`<div style="padding:10px 14px;font-size:12px;color:var(--muted)">No candidates have listed this course as a preference.</div>`;
+    } else {
+      avail.slice(0,8).forEach((inst,i)=>{
+        const s=getScore(inst), plc=(placements[inst.email]||[]).length;
+        const allPlacHere=(placements[inst.email]||[]).map((p,pi)=>({...p,pi})).filter(p=>p.courseCode===code);
+        const sectionsHere=allPlacHere.length;
+        const lastIdx=sectionsHere>0?allPlacHere[allPlacHere.length-1].pi:-1;
+        const actionBtns=sectionsHere>0
+          ?`<div style="display:flex;gap:4px;flex-shrink:0">
+              <button class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border-color:#fca5a5;width:32px;padding:0" onclick="rmPlac('${inst.email.replace(/'/g,"\\'")}',${lastIdx});event.stopPropagation()" title="Remove a section">−</button>
+              <button class="btn btn-sm btn-primary" style="background:#0f4c35;color:#6ee7b7;border-color:#0f4c35;width:32px;padding:0" onclick="quickPlace('${inst.email.replace(/'/g,"\\'")}','${code}')" title="Add a section">+</button>
+            </div>`
+          :`<button class="btn btn-sm btn-primary" style="flex-shrink:0" onclick="quickPlace('${inst.email.replace(/'/g,"\\'")}','${code}')">Place</button>`;
+        const crsAll=inst.courses||[], crsShow=crsAll.slice(0,6), crsMore=crsAll.length-6;
+        const crsPills=crsShow.map(c=>{const ps=progPillStyle(c2p[c]||'');const isCur=c===code;return `<span style="${isCur?'background:#fef3c7;color:#92400e;font-weight:700':ps};border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600;display:inline-block;margin:1px">${c}</span>`;}).join('')+(crsMore>0?`<span style="font-size:9px;color:var(--muted);margin-left:2px">+${crsMore}</span>`:'');
+        const progRank=(()=>{const pp=inst.programPriority||[];const prog=c2p[code];if(!pp.length)return '';const rank=pp.findIndex(p=>p.program===prog);return rank===0?'⭐ Primary':rank===1?'2nd choice':rank>=2?`${rank+1}th choice`:''})();
+        const mbaRank=(()=>{
+          const pfx=getMbaPrefix(code);
+          if(!pfx) return '';
+          const mr=inst.mbaCourseRanking||[];
+          const mp=inst.mbaProgramRanking||[];
+          const courseRank=mr.indexOf(code); // position in full list
+          const progRankIdx=mp.indexOf(pfx);  // which MBA program preference
+          if(progRankIdx<0&&courseRank<0) return '';
+          const progLabel=progRankIdx===0?'⭐ Top MBA prog':progRankIdx===1?'2nd MBA prog':progRankIdx>=2?`${progRankIdx+1}th MBA prog`:'';
+          const courseLabel=courseRank===0?'1st course choice':courseRank>0?`${courseRank+1}th course choice`:'';
+          return [progLabel,courseLabel].filter(Boolean).join(' · ');
+        })();
+        html+=`<div class="reco-row">
+          <div class="reco-rank">${i+1}</div>
+          ${s===null&&inst.status==='Returning'?`<div class="sbadge sbadge-returning" style="flex-shrink:0">R</div>`:`<div class="sbadge ${sBadgeClass(s)}" style="flex-shrink:0">${fmtScore(inst)??'—'}</div>`}
+          <div style="flex:1"><div class="reco-name" style="cursor:pointer;color:var(--primary)" onclick="showProfile('${inst.email.replace(/'/g,"\\'")}')">↗ ${inst.name}</div>
+            <div class="reco-meta">${inst.email}${sectionsHere>0?` · <span style="color:var(--green);font-weight:600">${sectionsHere} section${sectionsHere!==1?'s':''} placed</span>`:''}</div>
+            <div style="margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">${crsPills}${mbaRank?`<span style="font-size:9px;color:#6d28d9;font-weight:600;white-space:nowrap">${mbaRank}</span>`:progRank?`<span style="font-size:9px;color:var(--muted);white-space:nowrap">${progRank}</span>`:''}</div>
+          </div>
+          <span class="stbadge stbadge-${inst.status||'Other'}" style="flex-shrink:0">${inst.status}</span>
+          ${actionBtns}
+        </div>`;
+      });
+      if(avail.length>8) html+=`<div style="padding:6px 14px;font-size:11px;color:var(--muted)">+${avail.length-8} more candidates</div>`;
+    }
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function showProfile(email){
+  const inst=instructors.find(i=>i.email===email);
+  if(!inst) return;
+  document.getElementById('profileDrawerTitle').textContent=inst.name;
+  document.getElementById('profileDrawerBody').innerHTML=buildDP(inst);
+  document.getElementById('profileDrawer').style.display='block';
+}
+function closeProfileDrawer(){
+  document.getElementById('profileDrawer').style.display='none';
+}
+
+function quickPlace(email,code){
+  const c=COURSES.find(x=>x.code===code);
+  if(!placements[email])placements[email]=[];
+  const existing=placements[email].filter(p=>p.courseCode===code).length;
+  const note=existing>0?`Section ${existing+1}`:'';
+  placements[email].push({courseCode:code,courseName:c?c.name:code,note,placedAt:new Date().toISOString()});
+  const inst=instructors.find(i=>i.email===email);
+  if(inst)inst.status='Placed';
+  save();rReco();
+}
+
+function finish(src,added,updated){
+  lastSync=new Date().toLocaleString();updateLastSync();save();closeModal();render();
+  alert(`Import complete: ${added} new, ${updated} updated.`);
+}
+
+function updateLastSync(){
+  const el=document.getElementById('lastSyncTs');
+  if(el) el.textContent=lastSync?`Last synced: ${lastSync}`:'Never synced';
+}
+
+
+function exportCSV(){
+  const fi=filteredI();
+  const hdr=['Name','Email','Programs','Courses','Score','Status','Placements'];
+  const rows=fi.map(i=>{
+    const s=getScore(i);
+    const plc=(placements[i.email]||[]).map(p=>p.courseCode+(p.note?` (${p.note})`:'')).join('; ');
+    return [i.name,i.email,(i.programs||[]).join('; '),(i.courses||[]).join('; '),s!==null?s:'',i.status||'',plc];
+  });
+  const csv=[hdr,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:`rize_placements_${new Date().toISOString().slice(0,10)}.csv`});
+  a.click();
+}
+
+function confirmReset(){
+  document.getElementById('resetConfirm').value='';
+  document.getElementById('doResetBtn').disabled=true;
+  document.getElementById('resetModal').classList.add('open');
+}
+function doReset(){
+  localStorage.removeItem('rize_i');localStorage.removeItem('rize_p');localStorage.removeItem('rize_s');
+  instructors=SEED.map(i=>({...i}));placements={};lastSync='';openSections=[];filters={search:'',status:'',type:'',smin:null,smax:null,courses:[],program:'',published:'',pubYear:null,placedSections:''};
+  document.getElementById('resetModal').classList.remove('open');
+  document.getElementById('resetConfirm').value='';
+  updateLastSync();renderCourseFilter();renderProgFilter();render();
+}
+function save(){try{localStorage.setItem('rize_i',JSON.stringify(instructors));localStorage.setItem('rize_p',JSON.stringify(placements));localStorage.setItem('rize_s',lastSync)}catch(e){}}
+function load(){try{const i=localStorage.getItem('rize_i'),p=localStorage.getItem('rize_p'),s=localStorage.getItem('rize_s');if(i)instructors=JSON.parse(i);if(p)placements=JSON.parse(p);if(s)lastSync=s}catch(e){}}
+function sc(v,l,sub){return `<div class="stat-card"><div class="val">${v}</div><div class="lbl">${l}</div>${sub!==undefined?`<div style="font-size:10px;font-weight:600;color:var(--green);margin-top:2px">${sub} staffed</div>`:''}</div>`}
+function buildStats(){
+  const staffedCount=Object.values(placements).reduce((s,a)=>s+a.length,0);
+  const totalSections=openSections.length+staffedCount;
+  const openCourseCodes=new Set(openSections.map(s=>s.code));
+  const staffedCourseCodes=new Set(Object.values(placements).flat().map(p=>p.courseCode));
+  const totalCourses=new Set([...openCourseCodes,...staffedCourseCodes]).size;
+  const totalNew=instructors.filter(i=>i.status==='Vetted'||i.status==='Placed').length;
+  const placedNew=instructors.filter(i=>i.status==='Placed').length;
+  const totalRet=instructors.filter(i=>i.status==='Returning').length;
+  const placedRet=instructors.filter(i=>i.status==='Returning'&&(placements[i.email]||[]).length>0).length;
+  return `<div class="stats-row">${sc(totalSections,'Sections',staffedCount)}${sc(totalCourses,'Courses',staffedCourseCodes.size)}${sc(totalNew,'New Instructors',placedNew)}${sc(totalRet,'Returning',placedRet)}</div>`;
+}
+function emptyS(t,s){return `<div class="empty"><div class="icon">📋</div><strong>${t}</strong><p>${s}</p></div>`}
+
+load();
+if(instructors.length===0){
+  instructors=SEED.map(i=>({...i}));
+} else {
+  // Always sync scores + courses from SEED into localStorage data so updates aren't lost
+  SEED.forEach(s=>{
+    const inst=instructors.find(i=>i.email===s.email);
+    if(inst){
+      if(s.avgScore!=null&&s.avgScore!=='') inst.avgScore=s.avgScore;
+      if(s.initialScore!=null&&s.initialScore!=='') inst.initialScore=s.initialScore;
+      if(s.detailedScore!=null&&s.detailedScore!=='') inst.detailedScore=s.detailedScore;
+      if(s.courses&&s.courses.length>0&&(!inst.courses||inst.courses.length===0)) inst.courses=s.courses;
+      if(s.programs&&s.programs.length>0&&(!inst.programs||inst.programs.length===0)) inst.programs=s.programs;
+      if(s.programPriority&&s.programPriority.length>0&&(!inst.programPriority||inst.programPriority.length===0)) inst.programPriority=s.programPriority;
+      if(s.mbaCourseRanking&&s.mbaCourseRanking.length>0&&(!inst.mbaCourseRanking||inst.mbaCourseRanking.length===0)) inst.mbaCourseRanking=s.mbaCourseRanking;
+      if(s.mbaProgramRanking&&s.mbaProgramRanking.length>0&&(!inst.mbaProgramRanking||inst.mbaProgramRanking.length===0)) inst.mbaProgramRanking=s.mbaProgramRanking;
+      if(s.profile&&Object.values(s.profile).some(v=>v)&&(!inst.profile||!Object.values(inst.profile).some(v=>v))) inst.profile=s.profile;
+    } else {
+      // New instructor in SEED not yet in localStorage
+      instructors.push({...s});
+    }
+  });
+  save();
+}
+updateLastSync();renderCourseFilter();renderProgFilter();render();
+syncFromSheets(true); // auto-sync on load, silently
+</script>
+</body>
+</html>
