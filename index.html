@@ -1298,6 +1298,7 @@ function doStaffingDirect(rows){
 
   save();
   lastSync=new Date().toLocaleString();updateLastSync();
+  if(skipped.length) alert(`⚠️ ${skipped.length} staffed section(s) could not be matched to an instructor:\n\n${skipped.join('\n')}`);
 }
 
 // ── RECOMMENDATIONS ─────────────────────────────────────────────────────────
