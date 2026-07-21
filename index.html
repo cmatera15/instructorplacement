@@ -1228,6 +1228,7 @@ function doStaffingDirect(rows){
 
   openSections=[];
   const newPlacements={};
+  const skipped=[];
 
   rows.slice(1).forEach(row=>{
     const instructor=(instI>=0?row[instI]:'').trim();
@@ -1269,7 +1270,7 @@ function doStaffingDirect(rows){
           });
         }
       }
-      if(!inst) return;
+      if(!inst){skipped.push(`${rawCode} — "${instructor}"`);return;}
 
       if(!newPlacements[inst.email]) newPlacements[inst.email]=[];
       const c=COURSES.find(x=>x.code===code);
